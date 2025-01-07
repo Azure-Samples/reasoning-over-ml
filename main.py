@@ -1,8 +1,9 @@
 import os
 from openai import AzureOpenAI
-from src.assistant import AIAssistant
 import argparse
 from dotenv import load_dotenv
+from src.assistant import AIAssistant
+
 
 # Load environment variables from a .env file
 load_dotenv()

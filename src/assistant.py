@@ -1,10 +1,15 @@
+import logging
 from openai import AzureOpenAI
 import openai
 from openai.types.beta import Thread
 from openai.types.beta.threads import Run, Message
 import time
 import csv
+import subprocess
+from src.deploy_ml_model.create_input_data_for_model import create_input_data_for_model
 
+# Configure logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class AIAssistant:
     def __init__(
@@ -29,27 +34,22 @@ class AIAssistant:
 
         try:
             self.assistant = self.client.beta.assistants.create(
-            name=self.name,
-            description=self.description,
-            instructions=self.instructions,
-            model=self.model,
-        )
-            
+                name=self.name,
+                description=self.description,
+                instructions=self.instructions,
+                model=self.model,
+            )
+
             self.assistant_id = self.assistant.id
 
         except openai.BadRequestError as e:
-            print(f"Error details: {e}")
-            print(f"Request data: {e.param}")
-
-
-        
+            logging.error(f"Error details: {e}")
+            logging.error(f"Request data: {e.param}")
 
     def create_thread(self) -> Thread:
         thread = self.client.beta.threads.create()
         self.threads.append(thread)
         return thread
-
-
 
     def create_file(self, filename: str, file_id: str):
         content = self.client.files.retrieve_content(file_id)
@@ -95,7 +95,6 @@ class AIAssistant:
                 )
         return "Assistant: No message found"
 
-
     def create_response(
         self,
         question: str,
@@ -135,7 +134,7 @@ class AIAssistant:
 
             if run.status == "failed":
                 retries += 1
-                print(
+                logging.warning(
                     f"Run failed with the message: {run.last_error.message} \
                       Retrying in {retry_delay} seconds... (Attempt {retries}/{max_retries})"
                 )
@@ -160,24 +159,46 @@ class AIAssistant:
             message = response["answer"]
 
             # Extract feature names and values from the message
-            lines = message.replace('assistant: ', '').split('\n')
+            lines = message.replace("assistant: ", "").split("\n")
             feature_names = []
             values = []
             for line in lines:
-                if line.startswith('Feature Names: '):
-                    feature_names = line.replace('Feature Names: ', '').split(', ')
-                elif line.startswith('Values: '):
-                    values = line.replace('Values: ', '').split(', ')
+                if line.startswith("Feature Names: "):
+                    feature_names = line.replace("Feature Names: ", "").split(", ")
+                elif line.startswith("Values: "):
+                    values = line.replace("Values: ", "").split(", ")
 
             # Write to a CSV file
-            with open('src/ml-prediction/output.csv', 'w', newline='') as csvfile:
+            import os
+            os.makedirs("../src/deploy_ml_model/data/", exist_ok=True)
+            with open(
+                "../src/deploy_ml_model/data/output.csv", "w", newline=""
+            ) as csvfile:
                 csvwriter = csv.writer(csvfile)
                 csvwriter.writerow(feature_names)
                 csvwriter.writerow(values)
 
+            #Run tests using pytest
+            result = subprocess.run(['pytest', r'C:\Users\karinaa\OneDrive - Microsoft\Documents\codes\azure-samples\gbbai-o1-reasoning-over-ml\test\schema.py'], capture_output=True, text=True)
+            if result.returncode != 0:
+                logging.error(f"Tests failed:\n{result.stdout}\n{result.stderr}")
+                raise Exception("Tests did not pass")
+            else:
+                logging.info(f"Tests passed:\n{result.stdout}")
+                
             tokens = response["total_tokens"]
-            print(f"\033[33m{message}")
-            print(f"\033[33m{tokens}")
+
+            logging.info(f"{message}")
+            logging.info(f"{tokens}")
+
+        # Run tests using pytest
+        result = subprocess.run(['pytest', 'test'], capture_output=True, text=True)
+        if result.returncode != 0:
+            logging.error(f"Tests failed:\n{result.stdout}\n{result.stderr}")
+            raise Exception("Tests did not pass")
+        else:
+            logging.info(f"Tests passed:\n{result.stdout}")
+            create_input_data_for_model()
 
         if self.auto_delete:
             if file_ids:
@@ -231,7 +252,7 @@ class AIAssistant:
 
             if run.status == "failed":
                 retries += 1
-                print(
+                logging.warning(
                     f"Run failed. Retrying in {retry_delay} seconds... (Attempt {retries}/{max_retries})"
                 )
                 time.sleep(retry_delay)
