@@ -4,7 +4,7 @@ import os
 
 def test_validate_schema():
     # Load the output CSV file
-    output_df= pd.read_csv(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'src', 'ml-prediction', 'output.csv'))
+    output_df= pd.read_csv(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'src', 'deploy_ml_model', 'data', 'output.csv'))
 
     # Extract the column names
     output_columns = output_df.columns.tolist()
