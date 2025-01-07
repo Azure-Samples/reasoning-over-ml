@@ -9,7 +9,10 @@ import subprocess
 from src.deploy_ml_model.create_input_data_for_model import create_input_data_for_model
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
 
 class AIAssistant:
     def __init__(
@@ -170,6 +173,7 @@ class AIAssistant:
 
             # Write to a CSV file
             import os
+
             os.makedirs("../src/deploy_ml_model/data/", exist_ok=True)
             with open(
                 "../src/deploy_ml_model/data/output.csv", "w", newline=""
@@ -178,21 +182,28 @@ class AIAssistant:
                 csvwriter.writerow(feature_names)
                 csvwriter.writerow(values)
 
-            #Run tests using pytest
-            result = subprocess.run(['pytest', r'C:\Users\karinaa\OneDrive - Microsoft\Documents\codes\azure-samples\gbbai-o1-reasoning-over-ml\test\schema.py'], capture_output=True, text=True)
+            # Run tests using pytest
+            result = subprocess.run(
+                [
+                    "pytest",
+                    r"C:\Users\karinaa\OneDrive - Microsoft\Documents\codes\azure-samples\gbbai-o1-reasoning-over-ml\test\schema.py",
+                ],
+                capture_output=True,
+                text=True,
+            )
             if result.returncode != 0:
                 logging.error(f"Tests failed:\n{result.stdout}\n{result.stderr}")
                 raise Exception("Tests did not pass")
             else:
                 logging.info(f"Tests passed:\n{result.stdout}")
-                
+
             tokens = response["total_tokens"]
 
             logging.info(f"{message}")
             logging.info(f"{tokens}")
 
         # Run tests using pytest
-        result = subprocess.run(['pytest', 'test'], capture_output=True, text=True)
+        result = subprocess.run(["pytest", "test"], capture_output=True, text=True)
         if result.returncode != 0:
             logging.error(f"Tests failed:\n{result.stdout}\n{result.stderr}")
             raise Exception("Tests did not pass")

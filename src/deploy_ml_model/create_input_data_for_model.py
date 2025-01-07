@@ -1,10 +1,16 @@
 import json
 import os
+import logging
 from dotenv import load_dotenv
 
 from azure.ai.ml import MLClient
 from azure.identity import DefaultAzureCredential
 from azure.ai.ml.entities import Data
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 
 def create_input_data_for_model():
     # Load environment variables from a .env file
@@ -30,15 +36,15 @@ def create_input_data_for_model():
             fo.write(json.dumps(client_config))
         ml_client = MLClient.from_config(credential=credential, path=config_path)
 
-    print("Creating input data asset for model...")
-    
+    logger.info("Creating input data asset for model...")
+
     # Create a data asset
     data_asset = Data(
         name="output_data_asset",
         path=r"..\gbbai-o1-reasoning-over-ml\src\deploy-ml-model\data",
         type="uri_folder",
         description="Data asset for output data",
-        tags={"source": "output"}
+        tags={"source": "output"},
     )
 
     # Register the data asset

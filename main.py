@@ -1,12 +1,18 @@
 import os
+import logging
 from openai import AzureOpenAI
 import argparse
 from dotenv import load_dotenv
 from src.assistant import AIAssistant
 
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
 
 # Load environment variables from a .env file
 load_dotenv()
+
 
 class MLAssistant:
     def __init__(self, instructions_file_name, tools=None, functions=None):
@@ -43,7 +49,7 @@ class MLAssistant:
         self.assistant.chat()
 
 
-# Create a method to initialize the assistant 
+# Create a method to initialize the assistant
 def initialize_assistant():
     instructions_file = "../src/instructions/instructions-features-info.jinja2"
     return MLAssistant(instructions_file)
@@ -52,7 +58,7 @@ def initialize_assistant():
 # Main function
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="ML with O1 Reasoning Assistant")
-    #parser.add_argument()
+    # parser.add_argument()
     args = parser.parse_args()
     ml_assistant = initialize_assistant()
     ml_assistant.chat()
