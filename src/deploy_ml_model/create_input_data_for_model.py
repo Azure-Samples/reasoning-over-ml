@@ -41,7 +41,7 @@ def create_input_data_for_model():
     # Create a data asset
     data_asset = Data(
         name="output_data_asset",
-        path=r"..\gbbai-o1-reasoning-over-ml\src\deploy-ml-model\data",
+        path=r"..\gbbai-o1-reasoning-over-ml\src\deploy_ml_model\data",
         type="uri_folder",
         description="Data asset for output data",
         tags={"source": "output"},
