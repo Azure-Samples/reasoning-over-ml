@@ -7,6 +7,7 @@ location="eastus2"
 ### Get the subscription id and the user id
 subscription_id=$(az account show --query id --output tsv)
 user_id=$(az ad signed-in-user show --query id --output tsv)
+access_token=$(az account get-access-token --resource https://ml.azure.com --query "accessToken" --output tsv)
 
 # <set_variables>
 ai_resource_name="$prefix"
@@ -81,6 +82,10 @@ function create_env(){    echo "Creating .env file"
     echo 'AZURE_OPENAI_MODEL_NAME="gpt-4o"' >> .env
     echo "AZURE_SUBSCRIPTION_ID=$subscription_id" >> .env
     echo "AZURE_RESOURCE_GROUP=$ai_resource_name_resource_group_name" >> .env
+    echo "LOCATION=$location" >> .env
+    echo "SUBSCRIPTION_ID=$subscription_id" >> .env
+    echo "ACCESS_TOKEN=$access_token" >> .env
+
 }
 
 function run_all() {
