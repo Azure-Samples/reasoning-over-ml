@@ -8,6 +8,9 @@ from azure.ai.ml import MLClient
 from azure.identity import DefaultAzureCredential
 import time
 
+import pandas as pd
+import glob
+
 # Configure logging
 logging.basicConfig(level=logging.INFO)
 
@@ -16,6 +19,8 @@ load_dotenv()
 ENDPOINT_NAME = os.getenv("ENDPOINT_NAME")
 LOCATION = os.getenv("LOCATION")
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
+WORKSPACE_NAME = os.getenv("WORKSPACE_NAME")
+
 
 # Get the data asset path
 credential = DefaultAzureCredential()
@@ -39,65 +44,79 @@ except Exception as ex:
         fo.write(json.dumps(client_config))
     ml_client = MLClient.from_config(credential=credential, path=config_path)
 
-data_asset = ml_client.data.get("heart-dataset-unlabeled", version="2")
 
-path = data_asset.path
-logging.info(f"Data asset path: {path}")
+def get_output(job_name):
+    ml_client.jobs.download(name=job_name, download_path="./results_invoke", output_name="score")
+    output_files = glob.glob("./results_invoke/*.csv")
+    score = pd.concat((pd.read_csv(f) for f in output_files))
+    return score
 
-# Replace with your Azure Machine Learning endpoint URL
-url = f"https://{ENDPOINT_NAME}.{LOCATION}.inference.ml.azure.com/jobs"
+def invoke_endpoint():
+    data_asset = ml_client.data.get("heart-dataset-unlabeled", version="2")
 
-# Headers to include the access token for authorization
-headers = {
-    "Authorization": f"Bearer <{ACCESS_TOKEN}>",
-    "Content-Type": "application/json",
-}
+    path = data_asset.path
+    logging.info(f"Data asset path: {path}")
 
-# Example payload for a batch request (structure depends on your model input)
-data = {
-    "properties": {
-        "InputData": {"heart_data": {"JobInputType": "UriFolder", "Uri": path}}
+    # Replace with your Azure Machine Learning endpoint URL
+    url = f"https://{ENDPOINT_NAME}.{LOCATION}.inference.ml.azure.com/jobs"
+
+    # Headers to include the access token for authorization
+    headers = {
+        "Authorization": f"Bearer <{ACCESS_TOKEN}>",
+        "Content-Type": "application/json",
     }
-}
 
-# Make a POST request to submit the batch job
-response = requests.post(url, headers=headers, data=json.dumps(data))
+    # Example payload for a batch request (structure depends on your model input)
+    data = {
+        "properties": {
+            "InputData": {
+                "heart_data": {
+                    "JobInputType": "UriFolder",
+                    "Uri": path,
+                    "Id": "heart_data_input"  # Define an id for the data asset
+                }
+            }
+        }
+    }
 
-if response.status_code == 202:
-    logging.info("Batch job submitted successfully!")
-    logging.info(response.json())  # Print response from the service
-else:
-    logging.error(f"Error: {response.status_code}")
-    logging.error(response.text)
+    # Make a POST request to submit the batch job
+    response = requests.post(url, headers=headers, data=json.dumps(data))
 
-
-# Extract job ID from the response
-job_id = response.json()["id"]
-
-# Construct the URL to get the job status
-status_url = f"https://{ENDPOINT_NAME}.{LOCATION}.inference.ml.azure.com/jobs/{job_id}"
-
-# Poll the job status until it is completed
-while True:
-    status_response = requests.get(status_url, headers=headers)
-    status = status_response.json()["properties"]["status"]
-    if status in ["Completed", "Failed"]:
-        break
-    logging.info(
-        f"Job status: {status}. Waiting for 10 seconds before checking again..."
-    )
-    time.sleep(10)
-
-if status == "Completed":
-    # Construct the URL to get the job output
-    output_url = f"https://{ENDPOINT_NAME}.{LOCATION}.inference.ml.azure.com/jobs/{job_id}/outputs"
-    output_response = requests.get(output_url, headers=headers)
-    if output_response.status_code == 200:
-        logging.info("Job output retrieved successfully!")
-        logging.info(output_response.json())  # Print the job output
+    if response.status_code == 202:
+        logging.info("Batch job submitted successfully!")
+        logging.info(response.json())  # Print response from the service
     else:
-        logging.error(f"Error retrieving job output: {output_response.status_code}")
-        logging.error(output_response.text)
-else:
-    logging.error(f"Job failed with status: {status}")
-    logging.error(status_response.json())
+        logging.error(f"Error: {response.status_code}")
+        logging.error(response.text)
+
+
+    job_name = response.json()["name"]
+
+    # Construct the URL to get the job status
+    status_url = f"https://{ENDPOINT_NAME}.{LOCATION}.inference.ml.azure.com/jobs/{job_name}"
+
+    # Poll the job status until it is completed
+    while True:
+        status_response = requests.get(status_url, headers=headers)
+        status = status_response.json()["properties"]["status"]
+        if status in ["Completed", "Failed"]:
+            break
+        logging.info(
+            f"Job status: {status}. Waiting for 10 seconds before checking again..."
+        )
+        time.sleep(10)
+
+    if status == "Completed":
+        if status_response.status_code == 200:
+            logging.info("Job output retrieved successfully!")
+            logging.info(status_response.json())  # Print the job output
+            score = get_output(job_name)
+            return score
+        else:
+            logging.error(f"Error retrieving job output: {status_response.status_code}")
+            logging.error(status_response.text)
+            raise Exception(f"Error retrieving job output: {status_response.status_code}")
+    else:
+        logging.error(f"Job failed with status: {status}")
+        logging.error(status_response.json())
+        raise Exception(f"Job failed with status: {status}")
