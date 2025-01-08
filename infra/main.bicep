@@ -59,7 +59,7 @@ param modelSkuName string = 'GlobalStandard'
 param modelCapacity int = 50
 
 @description('OpenAI API version')
-param openaiApiVersion string = '2024-06-01'
+param openaiApiVersion string = '2024-05-01-preview'
 
 @description('Model deployment location. If you want to deploy an Azure AI resource/model in different location than the rest of the resources created.')
 param modelLocation string = 'eastus'
@@ -168,4 +168,9 @@ output RESOURCE_GROUP string = resourceGroupName
 output PROJECT_CONNECTION_STRING string = aiProject.outputs.projectConnectionString
 output AZURE_OPENAI_MODEL_NAME string = modelName
 output AZURE_OPENAI_API_VERSION string = openaiApiVersion
-output AZURE_OPENAI_ENDPOINT string = aiDependencies.outputs.modelEndpoint
+output AZURE_OPENAI_ENDPOINT string = 'https://${aiServicesName}${resourceToken}.openai.azure.com/'
+
+
+
+
+
