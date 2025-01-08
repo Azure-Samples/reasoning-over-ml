@@ -71,6 +71,9 @@
     "modelLocation": {
       "value": "eastus"
     },
+    "openAiApiVersion": {
+      "value": "2024-06-01"
+    },
     "aiServiceAccountResourceId": {
       "value": ""
     },

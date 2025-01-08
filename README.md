@@ -15,7 +15,7 @@ This approach not only improves the accuracy of the predictions but also provide
 
 ## Setup environment
 
-This sample uses [`azd`](https://learn.microsoft.com/azure/developer/azure-developer-cli/) and a bicep template to deploy all Azure resources, including Azure AI Search. 
+This sample uses [`azd`](https://learn.microsoft.com/azure/developer/azure-developer-cli/) and a bicep template to deploy all Azure resources, including the Azure OpenAI models.
 
 1. Login to your Azure account: `azd auth login`
 
