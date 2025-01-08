@@ -1,4 +1,5 @@
 black
+azure-identity
 openai>=1.37.1, <2.0.0
 python-dotenv>=1.0.1, <2.0.0
 ipykernel<=6.8.0

@@ -4,15 +4,22 @@ from openai import AzureOpenAI
 import argparse
 from dotenv import load_dotenv
 from src.assistant import AIAssistant
+from azure.identity import DefaultAzureCredential, get_bearer_token_provider
 
 # Configure logging
 logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
+# Get Azure credentials
+credential = DefaultAzureCredential()
+token_provider = get_bearer_token_provider(
+    credential, "https://cognitiveservices.azure.com/.default"
+)
+
+
 # Load environment variables from a .env file
 load_dotenv()
-
 
 class MLAssistant:
     def __init__(self, instructions_file_name, tools=None, functions=None):
@@ -24,7 +31,7 @@ class MLAssistant:
 
     def create_client(self):
         return AzureOpenAI(
-            api_key=os.getenv("AZURE_OPENAI_KEY"),
+            azure_ad_token_provider=token_provider,
             api_version=os.getenv("AZURE_OPENAI_API_VERSION"),
             azure_endpoint=os.getenv("AZURE_OPENAI_ENDPOINT"),
         )
