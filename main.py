@@ -19,7 +19,7 @@ token_provider = get_bearer_token_provider(
 
 
 # Load environment variables from a .env file
-load_dotenv()
+load_dotenv(override=True)
 
 class MLAssistant:
     def __init__(self, instructions_file_name, tools=None, functions=None):
