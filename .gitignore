@@ -408,5 +408,8 @@ venv/
 ENV/
 
 # Pytest
-
 *pytest_cache/
+
+# Predictions Folder
+
+*results_invoke/
