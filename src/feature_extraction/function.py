@@ -36,7 +36,9 @@ os.makedirs(os.path.dirname(config_path), exist_ok=True)
 with open(config_path, "w") as fo:
     fo.write(json.dumps(client_config))
 ml_client = MLClient.from_config(credential=credential, path=config_path)
-access_token = credential.get_token("https://management.azure.com/.default")
+access_token = credential.get_token("https://ml.azure.com/.default")
+access_token = access_token.token
+
 
 def get_output(job_name):
     ml_client.jobs.download(name=job_name, download_path="./results_invoke", output_name="score")
@@ -55,7 +57,7 @@ def invoke_endpoint():
 
     # Headers to include the access token for authorization
     headers = {
-        "Authorization": f"Bearer <{access_token.token}>",
+        "Authorization": f"Bearer <{access_token}>",
         "Content-Type": "application/json",
     }
 
