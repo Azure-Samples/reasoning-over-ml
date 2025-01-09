@@ -19,9 +19,7 @@ logging.basicConfig(level=logging.INFO)
 load_dotenv()
 ENDPOINT_NAME = os.getenv("ENDPOINT_NAME")
 LOCATION = os.getenv("LOCATION")
-ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")
 WORKSPACE_NAME = os.getenv("WORKSPACE_NAME")
-
 
 # Get the data asset path
 credential = DefaultAzureCredential()
@@ -57,7 +55,7 @@ def invoke_endpoint():
 
     # Headers to include the access token for authorization
     headers = {
-        "Authorization": f"Bearer <{access_token}>",
+        "Authorization": f"Bearer <{access_token.token}>",
         "Content-Type": "application/json",
     }
 
