@@ -10,6 +10,7 @@ import time
 
 import pandas as pd
 import glob
+import json, os
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -24,26 +25,20 @@ WORKSPACE_NAME = os.getenv("WORKSPACE_NAME")
 
 # Get the data asset path
 credential = DefaultAzureCredential()
-try:
-    ml_client = MLClient.from_config(credential=credential)
-except Exception as ex:
-    # NOTE: Update following workspace information to contain
-    #       your subscription ID, resource group name, and workspace name
-    client_config = {
-        "subscription_id": os.getenv("SUBSCRIPTION_ID"),
-        "resource_group": os.getenv("AZURE_RESOURCE_GROUP"),
-        "workspace_name": os.getenv("WORKSPACE_NAME"),
-    }
 
-    # write and reload from config file
-    import json, os
+client_config = {
+    "subscription_id": os.getenv("SUBSCRIPTION_ID"),
+    "resource_group": os.getenv("AZURE_RESOURCE_GROUP"),
+    "workspace_name": os.getenv("WORKSPACE_NAME"),
+}
 
-    config_path = "../.azureml/config.json"
-    os.makedirs(os.path.dirname(config_path), exist_ok=True)
-    with open(config_path, "w") as fo:
-        fo.write(json.dumps(client_config))
-    ml_client = MLClient.from_config(credential=credential, path=config_path)
-
+# write and reload from config file
+config_path = "../.azureml/config.json"
+os.makedirs(os.path.dirname(config_path), exist_ok=True)
+with open(config_path, "w") as fo:
+    fo.write(json.dumps(client_config))
+ml_client = MLClient.from_config(credential=credential, path=config_path)
+access_token = credential.get_token("https://management.azure.com/.default")
 
 def get_output(job_name):
     ml_client.jobs.download(name=job_name, download_path="./results_invoke", output_name="score")
@@ -62,7 +57,7 @@ def invoke_endpoint():
 
     # Headers to include the access token for authorization
     headers = {
-        "Authorization": f"Bearer <{ACCESS_TOKEN}>",
+        "Authorization": f"Bearer <{access_token}>",
         "Content-Type": "application/json",
     }
 
@@ -73,7 +68,6 @@ def invoke_endpoint():
                 "heart_data": {
                     "JobInputType": "UriFolder",
                     "Uri": path,
-                    "Id": "heart_data_input"  # Define an id for the data asset
                 }
             }
         }
@@ -109,14 +103,14 @@ def invoke_endpoint():
     if status == "Completed":
         if status_response.status_code == 200:
             logging.info("Job output retrieved successfully!")
-            logging.info(status_response.json())  # Print the job output
             score = get_output(job_name)
-            return score
         else:
             logging.error(f"Error retrieving job output: {status_response.status_code}")
             logging.error(status_response.text)
             raise Exception(f"Error retrieving job output: {status_response.status_code}")
+        return score
     else:
         logging.error(f"Job failed with status: {status}")
         logging.error(status_response.json())
         raise Exception(f"Job failed with status: {status}")
+
