@@ -13,3 +13,6 @@ pytest
 mltable
 setuptools
 azure-ai-ml
+azure-ai-projects 
+azure-ai-inference 
+azure-identity
