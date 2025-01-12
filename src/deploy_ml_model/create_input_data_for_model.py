@@ -38,11 +38,15 @@ def create_input_data_for_model():
 
     logger.info("Creating input data asset for model...")
 
+    data_path = os.path.realpath(
+        os.path.join(os.path.dirname(__file__), "../deploy_ml_model/data/")
+    )
+
     # Create a data asset
     data_asset = Data(
         name="output_data_asset",
-        path=os.path.join(os.path.dirname(__file__), "../data/")
-,        type="uri_folder",
+        path=data_path,
+        type="uri_folder",
         description="Data asset for output data",
         tags={"source": "output"},
     )
