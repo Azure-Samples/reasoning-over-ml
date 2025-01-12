@@ -133,8 +133,6 @@ if __name__ == "__main__":
     score = score.to_string(index=False)
 
     o1 = o1Chat()
-  
-
     prompt_template = o1.get_prompt_template_from_jinja2("./src/instructions/", "instructions-model-output.jinja2")
     response = o1.get_chat_response(
     messages=[{"role": "user", "content": f"please, give me a detailed and great explanation about the ACTUAL predictions: 0 1 filename.csv; 1 1 filename.csv"}],
