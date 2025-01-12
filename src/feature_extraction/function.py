@@ -41,10 +41,13 @@ access_token = access_token.token
 
 
 def get_output(job_name):
-    ml_client.jobs.download(name=job_name, download_path="./results_invoke", output_name="score")
+    ml_client.jobs.download(
+        name=job_name, download_path="./results_invoke", output_name="score"
+    )
     output_files = glob.glob("./results_invoke/*.csv")
     score = pd.concat((pd.read_csv(f) for f in output_files))
     return score
+
 
 def invoke_endpoint():
     data_asset = ml_client.data.get("heart-dataset-unlabeled", version="2")
@@ -83,11 +86,12 @@ def invoke_endpoint():
         logging.error(f"Error: {response.status_code}")
         logging.error(response.text)
 
-
     job_name = response.json()["name"]
 
     # Construct the URL to get the job status
-    status_url = f"https://{ENDPOINT_NAME}.{LOCATION}.inference.ml.azure.com/jobs/{job_name}"
+    status_url = (
+        f"https://{ENDPOINT_NAME}.{LOCATION}.inference.ml.azure.com/jobs/{job_name}"
+    )
 
     # Poll the job status until it is completed
     while True:
@@ -107,10 +111,11 @@ def invoke_endpoint():
         else:
             logging.error(f"Error retrieving job output: {status_response.status_code}")
             logging.error(status_response.text)
-            raise Exception(f"Error retrieving job output: {status_response.status_code}")
+            raise Exception(
+                f"Error retrieving job output: {status_response.status_code}"
+            )
         return score
     else:
         logging.error(f"Job failed with status: {status}")
         logging.error(status_response.json())
         raise Exception(f"Job failed with status: {status}")
-

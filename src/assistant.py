@@ -1,6 +1,6 @@
 import logging
 import os
-from openai import AzureOpenAI
+from openai import AzureOpenAI  # TODO change to FoundryOpenAI
 import openai
 from openai.types.beta import Thread
 from openai.types.beta.threads import Run, Message
@@ -11,7 +11,10 @@ from src.deploy_ml_model.create_input_data_for_model import create_input_data_fo
 from src.feature_extraction.function import invoke_endpoint
 
 # Configure logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+logging.basicConfig(
+    level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
+)
+
 
 class AIAssistant:
     def __init__(
@@ -152,13 +155,50 @@ class AIAssistant:
                     "total_tokens": tokens,
                 }
 
-    def chat_ml_output(self, question, file_ids: list[str] = None):
+    def chat(self, file_ids: list[str] = None):
         thread = self.create_thread()
-        response = self.create_response(question=question, thread_id=thread.id)
+        user_input = ""
+        user_input = input("\033[32m Please, input your ask: ")
+        response = self.create_response(question=user_input, thread_id=thread.id)
         message = response["answer"]
-        tokens = response["total_tokens"]
 
-        logging.info(f"{message}")
+        logging.info(message)
+
+        # Extract feature names and values from the message
+        lines = message.replace("assistant: ", "").split("\n")
+        feature_names = [name.strip() for name in lines[1].split(",")]
+        values = [line.split(", ") for line in lines[2:-1]]
+
+        # Write to a CSV file
+        output_dir = os.path.join(
+            os.path.dirname(__file__), "../src/deploy_ml_model/data/"
+        )
+        os.makedirs(output_dir, exist_ok=True)
+        output_file = os.path.join(output_dir, "output.csv")
+        with open(output_file, "w", newline="") as csvfile:
+            csvwriter = csv.writer(csvfile)
+            csvwriter.writerow(feature_names)
+            for value in values:
+                value = [name.strip() for name in value[0].split(",")]
+                csvwriter.writerow(value)
+
+        # Run tests using pytest
+        result = subprocess.run(
+            ["pytest", os.path.join(os.path.dirname(__file__), "../test/schema.py")],
+            capture_output=True,
+            text=True,
+        )
+        if result.returncode != 0:
+            logging.error(f"Tests failed:\n{result.stdout}\n{result.stderr}")
+            raise Exception("Tests did not pass")
+        else:
+            logging.info(f"Tests passed:\n{result.stdout}")
+            logging.info("Creating input data asset for model...")
+            # create_input_data_for_model()
+            logging.info("Invoke endpoint...")
+            score = invoke_endpoint()
+
+        tokens = response["total_tokens"]
         logging.info(f"{tokens}")
 
         if self.auto_delete:
@@ -168,58 +208,10 @@ class AIAssistant:
             self.client.beta.threads.delete(thread_id=thread.id)
             self.client.beta.assistants.delete(assistant_id=self.assistant.id)
 
-    def chat_fe(self, file_ids: list[str] = None):
-        thread = self.create_thread()
-        user_input = ""
-        while user_input != "bye" and user_input != "exit":
-            user_input = input("\033[32m Please, input your ask (or bye to exit) : ")
-            response = self.create_response(question=user_input, thread_id=thread.id)
-            message = response["answer"]
-
-            logging.info(message)
-
-            # Extract feature names and values from the message
-            lines = message.replace("assistant: ", "").split("\n")
-            feature_names = [name.strip() for name in lines[1].split(",")]
-            values = [line.split(", ") for line in lines[2:-1]]
-
-            # Write to a CSV file
-            output_dir = os.path.join(os.path.dirname(__file__), "../src/deploy_ml_model/data/")
-            os.makedirs(output_dir, exist_ok=True)
-            output_file = os.path.join(output_dir, "output.csv")
-            with open(output_file, "w", newline="") as csvfile:
-                csvwriter = csv.writer(csvfile)
-                csvwriter.writerow(feature_names)
-                for value in values:
-                    value = [name.strip() for name in value[0].split(",")]
-                    csvwriter.writerow(value)
-
-            #Run tests using pytest
-            result = subprocess.run(['pytest', os.path.join(os.path.dirname(__file__), "../test/schema.py")], capture_output=True, text=True)
-            if result.returncode != 0:
-                logging.error(f"Tests failed:\n{result.stdout}\n{result.stderr}")
-                raise Exception("Tests did not pass")
-            else:
-                logging.info(f"Tests passed:\n{result.stdout}")
-                logging.info("Creating input data asset for model...")
-                create_input_data_for_model()
-                logging.info("Invoke endpoint...")
-                score = invoke_endpoint()
-
-            tokens = response["total_tokens"]
-            logging.info(f"{message}")
-            logging.info(f"{tokens}")
-
-        if self.auto_delete:
-            if file_ids:
-                for file in file_ids:
-                    self.delete_file(file_id=file)
-            self.client.beta.threads.delete(thread_id=thread.id)
-            self.client.beta.assistants.delete(assistant_id=self.assistant.id)
-        
+        logging.info(f"{tokens}")
 
         return score
-    
+
     def create_message(self, thread_id: str, role: str, question: str):
         self.client.beta.threads.messages.create(
             thread_id=thread_id, role="user", content=question
