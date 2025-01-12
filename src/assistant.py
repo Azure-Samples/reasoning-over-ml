@@ -194,7 +194,7 @@ class AIAssistant:
         else:
             logging.info(f"Tests passed:\n{result.stdout}")
             logging.info("Creating input data asset for model...")
-            # create_input_data_for_model()
+            create_input_data_for_model()
             logging.info("Invoke endpoint...")
             score = invoke_endpoint_sdk()
 
