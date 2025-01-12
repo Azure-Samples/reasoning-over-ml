@@ -8,7 +8,7 @@ import time
 import csv
 import subprocess
 from src.deploy_ml_model.create_input_data_for_model import create_input_data_for_model
-from src.feature_extraction.function import invoke_endpoint
+from src.feature_extraction.function import invoke_endpoint_sdk
 
 # Configure logging
 logging.basicConfig(
@@ -196,7 +196,7 @@ class AIAssistant:
             logging.info("Creating input data asset for model...")
             # create_input_data_for_model()
             logging.info("Invoke endpoint...")
-            score = invoke_endpoint()
+            score = invoke_endpoint_sdk()
 
         tokens = response["total_tokens"]
         logging.info(f"{tokens}")

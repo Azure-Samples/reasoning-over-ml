@@ -6,8 +6,9 @@ from dotenv import load_dotenv
 
 from azure.ai.ml import MLClient
 from azure.identity import DefaultAzureCredential
-import time
+from azure.ai.ml import Input
 
+import time
 import pandas as pd
 import glob
 import json, os
@@ -21,8 +22,6 @@ ENDPOINT_NAME = os.getenv("ENDPOINT_NAME")
 LOCATION = os.getenv("LOCATION")
 WORKSPACE_NAME = os.getenv("WORKSPACE_NAME")
 
-# Get the data asset path
-credential = DefaultAzureCredential()
 
 client_config = {
     "subscription_id": os.getenv("SUBSCRIPTION_ID"),
@@ -35,9 +34,19 @@ config_path = "../.azureml/config.json"
 os.makedirs(os.path.dirname(config_path), exist_ok=True)
 with open(config_path, "w") as fo:
     fo.write(json.dumps(client_config))
-ml_client = MLClient.from_config(credential=credential, path=config_path)
+
+# Get the data asset path
+credential = DefaultAzureCredential()
+
+# Get access token
 access_token = credential.get_token("https://ml.azure.com/.default")
-access_token = access_token.token
+if access_token:
+    access_token = access_token.token
+else:
+    logging.error("Failed to retrieve access token.")
+
+
+ml_client = MLClient.from_config(credential=credential, path=config_path)
 
 
 def get_output(job_name):
@@ -119,3 +128,41 @@ def invoke_endpoint():
         logging.error(f"Job failed with status: {status}")
         logging.error(status_response.json())
         raise Exception(f"Job failed with status: {status}")
+
+
+
+
+def invoke_endpoint_sdk():
+    data_asset = ml_client.data.get("heart-dataset-unlabeled", version="2")
+
+    path = data_asset.path
+    logging.info(f"Data asset path: {path}")
+    
+
+    job = ml_client.batch_endpoints.invoke(
+        ENDPOINT_NAME,
+        inputs={"heart_data": Input(path=path)}
+    )
+
+    job_name = job.name
+    time.sleep(1)
+    job = ml_client.jobs.get(job_name)
+    logging.info(f"Job name: {job_name}")
+
+    while True:
+        status = job.status
+        if status in ["Completed", "Failed"]:
+            break
+        logging.info(
+            f"Job status: {status}. Waiting for 10 seconds before checking again..."
+        )
+        time.sleep(10)
+
+    if status == "Completed":
+        logging.info("Job completed successfully!")
+        score = get_output(job_name)
+        return score
+    else:
+        logging.error(f"Job failed with status: {status}")
+        raise Exception(f"Job failed with status: {status}")
+
