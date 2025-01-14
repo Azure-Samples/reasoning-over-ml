@@ -146,10 +146,10 @@ def invoke_endpoint_sdk():
 
     job_name = job.name
     time.sleep(1)
-    job = ml_client.jobs.get(job_name)
     logging.info(f"Job name: {job_name}")
 
     while True:
+        job = ml_client.jobs.get(job_name)
         status = job.status
         if status in ["Completed", "Failed"]:
             break
