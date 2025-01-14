@@ -6,6 +6,29 @@ By integrating GPT-4 and GPT o1, the project aims to enhance the interpretabilit
 
 This approach not only improves the accuracy of the predictions but also provides a deeper understanding of the underlying data and model behavior, facilitating better decision-making and more effective utilization of machine learning in various applications.
 
+## Prerequisites
++ [azd](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd), used to deploy all Azure resources and assets used in this sample.
+
++ [PowerShell Core pwsh](https://github.com/PowerShell/powershell/releases) if using Windows
+
++ Python 3.11
+
+## Setup environment
+
+This sample uses [`azd`](https://learn.microsoft.com/azure/developer/azure-developer-cli/) and a bicep template to deploy all Azure resources, including the Azure OpenAI models.
+
+1. Login to your Azure account: `azd auth login`
+
+2. Create an environment: `azd env new`
+
+3. Run `azd up`.
+
+   + Choose a name for your resourge group.
+   + Enter a region for the resources.
+
+   The deployment creates multiple Azure resources and runs multiple jobs. It takes several minutes to complete. The deployment is complete when you get a command line notification stating "SUCCESS: Your up workflow to provision and deploy to Azure completed."
+
+
 ## Features
 
 This project framework provides the following features:
