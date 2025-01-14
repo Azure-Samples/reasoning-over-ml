@@ -1,6 +1,6 @@
 #!/bin/bash
 ### PARAMETERS ###
-prefix="demo-reasoning-o1-ml"                                # The prefix for the resources
+prefix=""                                # The prefix for the resources
 location="eastus2"
 
 # <set_variables>
