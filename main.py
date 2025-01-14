@@ -14,6 +14,9 @@ logging.basicConfig(
     level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s"
 )
 
+logging.getLogger("azure.identity").setLevel(logging.WARNING)
+
+
 # Load environment variables from a .env file
 load_dotenv()
 
@@ -62,21 +65,30 @@ class MLAssistant:
         return self.assistant.chat()
 
 
-
 class o1Chat():
 
-    def __init__(self):
-        project_connection_string = os.getenv("CONNSTRING")
-
-        project = AIProjectClient.from_connection_string(
-            conn_str=project_connection_string, credential=DefaultAzureCredential()
+    def get_chat_response(self, messages, context, prompt_template):
+        
+        client = AzureOpenAI(
+        azure_endpoint = os.getenv("AZURE_OPENAI_ENDPOINT_O1"), 
+        api_key=os.getenv("AZURE_OPENAI_API_KEY_O1"),  
+        api_version=os.getenv("AZURE_OPENAI_API_VERSION_O1")
         )
 
-        self.chat = project.inference.get_chat_completions_client()
+        # generate system message from the template, passing in the context as variables
+        system_message = prompt_template.create_messages(data=context) 
 
+        system_message[0]["role"] = "assistant"
+
+        response = client.chat.completions.create(
+            model=os.getenv("AZURE_OPENAI_MODEL_NAME_O1"),
+            messages=system_message + messages,
+            max_completion_tokens=5000
+        )
+        return response
 
     def get_prompt_template_from_jinja2(
-            self,
+        self,
         prompt_path: str,
         prompt_name: str,
         jinja2_placeholders: dict[str, str]={},
@@ -99,6 +111,19 @@ class o1Chat():
             prompt_string
         )
         return prompt_template
+    
+
+class o1ChatFoundry(o1Chat):
+    def __init__(self):
+        super().__init__()
+        project_connection_string = os.getenv("CONNSTRING")
+
+        project = AIProjectClient.from_connection_string(
+            conn_str=project_connection_string, credential=DefaultAzureCredential()
+        )
+
+        self.chat = project.inference.get_chat_completions_client()
+
 
     def get_chat_response(self, messages, context, prompt_template):
 
@@ -107,7 +132,7 @@ class o1Chat():
 
         # add the prompt messages to the user messages
         response = self.chat.complete(
-            model="gpt-4o",
+            model=os.getenv("AZURE_OPENAI_MODEL_NAME_O1"),
             messages=system_message + messages,
             temperature=1,
             frequency_penalty=0.5,
@@ -115,7 +140,6 @@ class o1Chat():
         )
 
         return response
-
 
 # Create a method to initialize the assistant
 def initialize_assistant():
@@ -132,10 +156,12 @@ if __name__ == "__main__":
     score = assistant.chat()
     score = score.to_string(index=False)
 
+    print(score)
+
     o1 = o1Chat()
-    prompt_template = o1.get_prompt_template_from_jinja2("./src/instructions/", "instructions-model-output.jinja2")
+    prompt_template = o1.get_prompt_template_from_jinja2("C:\\Users\\karinaa\\OneDrive - Microsoft\\Documents\\codes\\azure-samples\\gbbai-o1-reasoning-over-ml\\src\\instructions\\", "instructions-model-output.jinja2")
     response = o1.get_chat_response(
-    messages=[{"role": "user", "content": f"please, give me a detailed and great explanation about the ACTUAL predictions: 0 1 filename.csv; 1 1 filename.csv"}],
+    messages=[{"role": "user", "content": f"please, give me a detailed and great explanation about the ACTUAL predictions: {score}"}],
     context={""},
     prompt_template=prompt_template
     )
