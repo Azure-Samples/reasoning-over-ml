@@ -1,0 +1,19 @@
+black
+azure-identity
+openai>=1.37.1, <2.0.0
+python-dotenv>=1.0.1, <2.0.0
+ipykernel<=6.8.0
+faker
+google-cloud-bigquery
+azure-search-documents==11.4.0
+azure-core
+streamlit==1.33.0
+pandas
+chardet
+pytest
+mltable
+setuptools
+azure-ai-ml
+azure-ai-projects 
+azure-ai-inference 
+azure-identity
