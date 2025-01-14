@@ -21,7 +21,6 @@ logging.getLogger("azure.identity").setLevel(logging.WARNING)
 # Load environment variables from a .env file
 load_dotenv()
 
-
 # Load environment variables from a .env file
 load_dotenv(override=True)
 
@@ -160,10 +159,8 @@ if __name__ == "__main__":
     score = assistant.chat()
     score = score.to_string(index=False)
 
-    print(score)
-
     o1 = o1Chat()
-    prompt_template = o1.get_prompt_template_from_jinja2("/src/instructions/", "instructions-model-output.jinja2")
+    prompt_template = o1.get_prompt_template_from_jinja2("src/instructions/", "instructions-model-output.jinja2")
     response = o1.get_chat_response(
     messages=[{"role": "user", "content": f"please, give me a detailed and great explanation about the ACTUAL predictions: {score}"}],
     context={""},
