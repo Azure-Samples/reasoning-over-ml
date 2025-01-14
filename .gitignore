@@ -398,3 +398,18 @@ FodyWeavers.xsd
 
 # JetBrains Rider
 *.sln.iml
+
+# Environments
+*venv
+.env
+.venv
+env/
+venv/
+ENV/
+
+# Pytest
+*pytest_cache/
+
+# Predictions Folder
+
+*results_invoke/

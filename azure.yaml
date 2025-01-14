@@ -1,0 +1,17 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
+
+name: aimlssistant-demo
+metadata:
+  template: aimlssistant-demo
+hooks:
+    postup:
+      windows:
+        shell: pwsh
+        run: ./infra/scripts/write_env.ps1; ./infra/scripts/load_python_env.ps1; 
+        interactive: true
+        continueOnError: false
+      posix:
+        shell: sh
+        run: ./infra/scripts/write_env.sh; ./infra/scripts/load_python_env.sh; 
+        interactive: true
+        continueOnError: false
