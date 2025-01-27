@@ -1,10 +1,11 @@
-# o1 reasoning over machine learning models
+# <img src="./docs/img/azure_logo.png" alt="Azure Logo" style="width:30px;height:30px;"/> o1 reasoning over machine learning models
 
-This project leverages GPT-4 to extract features and their values from user input, which are then used as input for an ML model registered with MLflow. The extracted information is subsequently provided to a GPT o1 model to reason about the output, enabling advanced reasoning capabilities over the machine learning predictions.
+This project leverages GPT-4 to extract features and their values from user input, which are then used as input for an ML model registered with MLflow. The extracted information is subsequently provided to a o1 model to reason about the output, enabling advanced reasoning capabilities over the machine learning predictions.
 
-By integrating GPT-4 and GPT o1, the project aims to enhance the interpretability and usability of machine learning models. The GPT-4 model processes user queries to identify and extract relevant features, which are then fed into the ML model. The results from the ML model are further analyzed by the GPT o1 model to provide comprehensive insights and reasoning, making the predictions more understandable and actionable for users.
+By integrating GPT-4 and o1, the project aims to enhance the interpretability and usability of machine learning models. The GPT-4 model processes user queries to identify and extract relevant features, which are then fed into the ML model. The results from the ML model are further analyzed by the GPT o1 model to provide comprehensive insights and reasoning, making the predictions more understandable and actionable for users.
 
-This approach not only improves the accuracy of the predictions but also provides a deeper understanding of the underlying data and model behavior, facilitating better decision-making and more effective utilization of machine learning in various applications.
+This repository also supports calling batch endpoints in the assistant. By deploying an MLflow model from the `deployment-custom` folder, you can integrate batch endpoint results with the o1 model in various automated ways.
+
 
 ## Prerequisites
 + [azd](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd), used to deploy all Azure resources and assets used in this sample.
@@ -31,11 +32,26 @@ This sample uses [`azd`](https://learn.microsoft.com/azure/developer/azure-devel
 
 ## Features
 
-This project framework provides the following features:
+This project includes several key features that enhance its functionality and usability:
 
-* Feature 1
-* Feature 2
-* ...
+1. **Feature Extraction**: Utilizes GPT-4 to extract relevant features and their values from user input, ensuring accurate and meaningful data is fed into the ML model.
+
+2. **ML Model Integration**: Integrates with MLflow to use pre-registered machine learning models, facilitating seamless predictions based on the extracted features.
+
+3. **Advanced Reasoning**: Employs an o1 model to reason about the ML model's output, providing deeper insights and interpretability of the predictions.
+
+4. **Automated Deployment**: Uses `azd` and Bicep templates for automated deployment of Azure resources, simplifying the setup process.
+
+5. **Streamlit interface**: TODO
+
+Consider starting with GPT-4 to gather and refine information, then pass the output to the o1 model. This approach leverages the threading feature for further analysis or other tasks, expanding on the initial response for deeper insights.
+
+To-dos:
+
+- Implement a parser in case the user wants to provide just an Excel file with features.
+- Implement a method that sends the outputs directly to O1, in case the user already has the outputs and does not wish to execute the batch endpoint.
+- Implement streamlit interface
+
 
 ## Getting Started
 
@@ -59,33 +75,12 @@ pip install -r requirements.txt
 
 This script requires running the `deploy.sh` script located in the `deploy-ml-model` folder first.
 
+This will deploy an MLflow model located in the `deployment-custom` folder. However, there are various automated ways to deploy this batch endpoint. This example demonstrates how to use results from batch endpoints in GPT models.
+
 ```bash
 cd deploy-ml-model
 ./deploy.sh
 ```
-
-### Prerequisites
-
-(ideally very short, if any)
-
-- OS
-- Library version
-- ...
-
-### Installation
-
-(ideally very short)
-
-- npm install [package name]
-- mvn install
-- ...
-
-### Quickstart
-(Add steps to get up and running quickly)
-
-1. git clone [repository clone url]
-2. cd [repository name]
-3. ...
 
 
 ## Demo
