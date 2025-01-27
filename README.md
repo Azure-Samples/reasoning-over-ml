@@ -138,7 +138,6 @@ assistant: age,sex,cp,trestbps,chol,fbs,restecg,thalach,exang,oldpeak,slope,ca,t
 INFO:root:Tests passed:
 ============================= test session starts =============================
 platform win32 -- Python 3.12.8, pytest-8.3.4, pluggy-1.5.0
-rootdir: C:\Users\karinaa\OneDrive - Microsoft\Documents\codes\azure-samples\gbbai-o1-reasoning-over-ml
 plugins: anyio-4.8.0, Faker-33.3.0
 collected 1 item
 
@@ -156,7 +155,6 @@ INFO:root:Invoke endpoint...
 Request method: 'GET'
 Request headers:
     'Accept': 'application/json'
-    'x-ms-client-request-id': '96e3d8ba-d11d-11ef-9fec-8c3b4a55ecfb'
     'User-Agent': 'azure-ai-ml/1.23.1 azsdk-python-mgmt-machinelearningservices/0.1.0 Python/3.12.8 (Windows-11-10.0.22631-SP0)'
     'Authorization': 'REDACTED'
 
@@ -168,9 +166,11 @@ INFO:root:Job status: Running. Waiting for 10 seconds before checking again...
 INFO:root:Job status: Running. Waiting for 10 seconds before checking again...
 INFO:root:Job status: Running. Waiting for 10 seconds before checking again...
 
-────────────────────────────────────────────────────────────────────────────
+
+
+---
 1. Overview of the Predictions
-────────────────────────────────────────────────────────────────────────────
+---
 
 • “prediction = 0” usually indicates the model predicts “no presence of heart disease.”
 • “prediction = 1” usually indicates the model predicts “presence of heart disease.”
@@ -185,9 +185,9 @@ For example, in your provided results:
 
 Most of the predictions here are 0, with a subset indicated as 1. That distribution can happen if the model sees fewer patients with strong risk factors or if the data share many characteristic patterns that align with “no presence of heart disease.”
 
-────────────────────────────────────────────────────────────────────────────
+---
 2. Key Features Influencing Predictions
-────────────────────────────────────────────────────────────────────────────
+---
 
 Even though we cannot see the exact features for each row, these are some of the important variables that typically influence a heart-disease classification model:
 
@@ -221,9 +221,9 @@ Even though we cannot see the exact features for each row, these are some of the
 10) Thalassemia (thal):
    - Certain results (like “fixed” or “reversible”) can point to underlying heart stress.
 
-────────────────────────────────────────────────────────────────────────────
+---
 3. Why Rows Might Differ
-────────────────────────────────────────────────────────────────────────────
+---
 
 • Each row represents a different patient or measurement set. Small differences in features (like whether chest pain is typical or atypical, how high the cholesterol is, or if someone experiences exercise-induced chest pain) can cause large changes in the model’s predicted probability.
 
@@ -233,9 +233,9 @@ Even though we cannot see the exact features for each row, these are some of the
 
 • A row receiving a “0” suggests the model found that patient’s features more closely match individuals without heart disease.
 
-────────────────────────────────────────────────────────────────────────────
+---
 4. Interpreting the Distribution of 0s and 1s
-────────────────────────────────────────────────────────────────────────────
+---
 
 • High Frequency of Prediction “0”:
   If most of the rows have a predicted label “0,” the data for those specific patients likely resembled lower-risk patterns. Perhaps their test results (like chest pain type, cholesterol, blood pressure) did not align with the typical high-risk profiles learned by the model.
@@ -243,9 +243,9 @@ Even though we cannot see the exact features for each row, these are some of the
 • Why Some Rows Are “1”:
   Where you see a “1,” the model likely identified risk factors or combinations of features frequently observed in individuals who do have heart disease. Examples might include older age, a higher cholesterol reading, presence of typical angina, certain ECG abnormalities, or other strong signals commonly associated with heart disease.
 
-────────────────────────────────────────────────────────────────────────────
+---
 5. Limitations and Cautions
-────────────────────────────────────────────────────────────────────────────
+---
 
 1) Model Limitations:
    - No model is perfect. It might produce false positives (predicting “1” when the individual does not have heart disease) or false negatives (predicting “0” when the individual does have heart disease).
@@ -256,9 +256,9 @@ Even though we cannot see the exact features for each row, these are some of the
 3) No Substitute for Medical Advice:
    - Even though the model is designed to help identify risk of heart disease, it cannot give a definitive conclusion about an individual’s health. A qualified medical professional should interpret the results and conduct further tests as necessary.
 
-────────────────────────────────────────────────────────────────────────────
+---
 6. Summing Up
-────────────────────────────────────────────────────────────────────────────
+---
 
 • Each row’s “0” or “1” classification is the model’s best guess about the presence of heart disease based on the patterns it has learned from historical data.
 • A “1” typically flags potential concern, suggesting that the individual’s pattern of inputs (age, cholesterol, chest pain type, etc.) is consistent with heart-disease-positive cases seen during training.
