@@ -1,0 +1,29 @@
+artifact_path: pipeline
+flavors:
+  python_function:
+    env: conda.yaml
+    loader_module: mlflow.catboost
+    model_path: model.pkl
+    python_version: 3.12.9
+  catboost:
+    model_path: model.pkl
+    catboost_version: 1.2.7
+signature:
+  inputs: '[ {"name": "store_nbr", "type": "string"},
+             {"name": "family", "type": "string"},
+             {"name": "onpromotion", "type": "long"},
+             {"name": "weekday", "type": "string"},
+             {"name": "month", "type": "long"},
+             {"name": "month_name", "type": "string"},
+             {"name": "year", "type": "long"},
+             {"name": "week_of_year", "type": "long"},
+             {"name": "day_of_year", "type": "long"},
+             {"name": "dcoilwtico", "type": "double"},
+             {"name": "sales_lag_21", "type": "double"},
+             {"name": "sales_lag_28", "type": "double"},
+             {"name": "sales_expanded_mean", "type": "double"},
+             {"name": "sales_rolling_mean_20", "type": "double"},
+             {"name": "sales_rolling_mean_30", "type": "double"},
+             {"name": "sales_rolling_mean_40", "type": "double"},
+             {"name": "specific_day_sales_average", "type": "double"}]'
+  outputs: '[{"type": "double"}]'

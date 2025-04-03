@@ -86,7 +86,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2022-09-01' = {
 }
 
 // Dependent resources for the Azure Machine Learning workspace
-module aiDependencies './agent/standard-dependent-resources.bicep' = {
+module aiDependencies './modules/standard-dependent-resources.bicep' = {
   name: '${abbrs.cognitiveServicesAccounts}${resourceToken}'
   scope: resourceGroup
   params: {
@@ -109,7 +109,7 @@ module aiDependencies './agent/standard-dependent-resources.bicep' = {
     }
 }
 
-module aiHub './agent/standard-ai-hub.bicep' = {
+module aiHub './modules/standard-ai-hub.bicep' = {
   name: '${abbrs.cognitiveServicesAIhub}${resourceToken}'
   scope: resourceGroup
   params: {
@@ -131,7 +131,7 @@ module aiHub './agent/standard-ai-hub.bicep' = {
 }
 
 
-module aiProject './agent/standard-ai-project.bicep' = {
+module aiProject './modules/standard-ai-project.bicep' = {
   name: '${abbrs.cognitiveServicesAIproject}${resourceToken}'
   scope: resourceGroup
   params: {
@@ -151,7 +151,7 @@ module aiProject './agent/standard-ai-project.bicep' = {
   }
 }
 
-module aiServiceRoleAssignments './agent/ai-service-role-assignments.bicep' = {
+module aiServiceRoleAssignments './modules/ai-service-role-assignments.bicep' = {
   name: 'aiserviceroleassignments${projectName}${resourceToken}deployment'
   scope: resourceGroup
   params: {
