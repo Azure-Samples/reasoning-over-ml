@@ -411,5 +411,7 @@ ENV/
 *pytest_cache/
 
 # Predictions Folder
-
 *results_invoke/
+
+.DS_Store
+

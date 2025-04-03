@@ -1,0 +1,5 @@
+$schema: https://azuremlschemas.azureedge.net/latest/data.schema.json
+name: store-data
+description: Thousands of product families sold at Favorita stores located in Ecuador
+type: uri_folder
+path: data
