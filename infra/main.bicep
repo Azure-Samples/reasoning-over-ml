@@ -16,8 +16,6 @@ param environmentName string
 })
 param location string = 'eastus'
 
-@description('Name of the resource group')
-param resourceGroupName string = ''
 
 @description('Name for the AI resource and used to derive name of dependent resources.')
 param aiHubName string = 'hub-demo'
@@ -164,13 +162,22 @@ module aiServiceRoleAssignments './modules/ai-service-role-assignments.bicep' = 
 // App outputs
 output AZURE_LOCATION string = location
 output AZURE_TENANT_ID string = tenant().tenantId
-output RESOURCE_GROUP string = resourceGroupName
+output RESOURCE_GROUP string = '${abbrs.resourcesResourceGroups}${environmentName}'
 output PROJECT_CONNECTION_STRING string = aiProject.outputs.projectConnectionString
 output AZURE_OPENAI_MODEL_NAME string = modelName
 output AZURE_OPENAI_API_VERSION string = openaiApiVersion
 output AZURE_OPENAI_ENDPOINT string = 'https://${aiServicesName}${resourceToken}.openai.azure.com/'
+output SUBSCRIPTION_ID string = subscription().subscriptionId
 
 
-
+// module runPowerShellInlineWithOutput './modules/run_script.bicep' = {
+//   name: 'script_env${resourceToken}'
+//   scope: resourceGroup
+//   params: {
+//     // workspace organization
+//     location: location
+//     name: 'script_env'
+//   }
+// }
 
 

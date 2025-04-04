@@ -59,7 +59,7 @@ def get_output(job_name):
 
 
 def invoke_endpoint():
-    data_asset = ml_client.data.get("heart-dataset-unlabeled", version="2")
+    data_asset = ml_client.data.get("store-sales", version="latest")
 
     path = data_asset.path
     logging.info(f"Data asset path: {path}")
