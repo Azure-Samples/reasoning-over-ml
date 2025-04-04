@@ -82,6 +82,10 @@ cd deploy-ml-model
 ./deploy.sh
 ```
 
+Before proceeding, ensure that your storage account meets the following requirements:
+
+- Storage account key access is enabled.
+- Connections are allowed from all networks or from your specific IP.
 
 ## Demo
 

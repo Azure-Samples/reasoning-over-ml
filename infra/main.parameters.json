@@ -54,22 +54,22 @@
       "value": "agent-ai-services"
     },
     "modelName": {
-      "value": "gpt-4o"
+      "value": "gpt-4o-mini"
     },
     "modelFormat": {
       "value": "OpenAI"
     },
     "modelVersion": {
-      "value": "2024-05-13"
+      "value": "2024-07-18"
     },
     "modelSkuName": {
       "value": "Standard"
     },
     "modelCapacity": {
-      "value": 100
+      "value": 50
     },
     "modelLocation": {
-      "value": "eastus"
+      "value": "eastus2"
     },
     "openAiApiVersion": {
       "value": "2024-05-01-preview"
