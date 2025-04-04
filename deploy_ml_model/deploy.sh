@@ -4,30 +4,29 @@
 command -v az >/dev/null 2>&1 || { echo >&2 "az CLI is required but not installed. Aborting."; exit 1; }
 
 ### PARAMETERS ###
-if [ -f .env ]; then
+if [ -f ../.env ]; then
     # Source the .env file to load variables into the environment
     set -a
-    . .env
+    . ../.env
     set +a
     # Assign the variables from .env (note: names are case-sensitive)
-    prefix="${PREFIX}"
     location="${LOCATION}"
+    resource_group="${AZURE_RESOURCE_GROUP}"
 else
     echo ".env file not found. Please create it with the required variables."
     exit 1
 fi
 
 # <set_variables>
-ai_resource_name="$prefix"
-resource_group="${ai_resource_name}-rg"
 MODEL_NAME='forecasting-store-sales'
-ml_workspace="${ai_resource_name}-ml"
+ml_workspace="${resource_group/-rg/}-ml"
+echo ${ml_workspace}
 subscription_id=$(az account show --query id --output tsv)
 
 # Generate a unique endpoint name using the prefix
-ENDPOINT_SUFFIX="$prefix"
+ENDPOINT_SUFFIX=$(date +"%Y%m")
 ENDPOINT_NAME="${MODEL_NAME}-${ENDPOINT_SUFFIX}"
-DEPLOYMENT_NAME="classifier-xgboost-mlflow"
+DEPLOYMENT_NAME="forecasting-castboost-mlflow"
 # </set_variables>
 
 # <set_workspace>
@@ -47,6 +46,7 @@ echo "Creating compute"
 # <create_compute>
 az ml compute create -n batch-cluster --type amlcompute --min-instances 0 --max-instances 5
 # </create_compute>
+
 
 echo "Creating batch endpoint: $ENDPOINT_NAME"
 # <create_endpoint>
@@ -73,17 +73,27 @@ echo "Updating the batch endpoint to set default deployment: $DEPLOYMENT_NAME"
 az ml batch-endpoint update --name "$ENDPOINT_NAME" --set "defaults.deployment_name=$DEPLOYMENT_NAME"
 # </set_default_deployment>
 
+
 echo "Showing details of the batch deployment"
 # <query_deployment>
 az ml batch-deployment show --name "$DEPLOYMENT_NAME" --endpoint-name "$ENDPOINT_NAME"
 # </query_deployment>
 
-# Save environment variables to .env for later use
-{
-    echo "ENDPOINT_NAME=$ENDPOINT_NAME";
-    echo "WORKSPACE_NAME=$ml_workspace";
-    echo "PREFIX=$prefix";
-    echo "LOCATION=$location";
-} >> .env
+
+
+# Update environment variables in .env for later use without recreating the file
+env_file="../.env"
+
+if grep -q "^ENDPOINT_NAME=" "$env_file"; then
+    sed -i "" "s/^ENDPOINT_NAME=.*/ENDPOINT_NAME=$ENDPOINT_NAME/" "$env_file"
+else
+    echo "ENDPOINT_NAME=$ENDPOINT_NAME" >> "$env_file"
+fi
+
+if grep -q "^WORKSPACE_NAME=" "$env_file"; then
+    sed -i "" "s/^WORKSPACE_NAME=.*/WORKSPACE_NAME=$ml_workspace/" "$env_file"
+else
+    echo "WORKSPACE_NAME=$ml_workspace" >> "$env_file"
+fi
 
 echo "Deployment script completed successfully."

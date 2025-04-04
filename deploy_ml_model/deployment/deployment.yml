@@ -3,7 +3,7 @@ endpoint_name: sales-store-batch
 description: Time-series forecasting to forecast store sales on data from Corporación Favorita, a large Ecuadorian-based grocery retailer - batch inference
 name: forecasting-catboost-mlflow
 type: model
-model: azureml:forecasting-catboost-mlflow@latest
+model: azureml:forecasting-store-sales@latest
 compute: azureml:batch-cluster
 resources:
   instance_count: 2
