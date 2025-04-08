@@ -8,9 +8,10 @@ flavors:
   catboost:
     model_path: model.pkl
     catboost_version: 1.2.7
+    model_type: CatBoostRegressor
 signature:
   inputs: '[ {"name": "store_nbr", "type": "string"},
-             {"name": "family", "type": "string"},
+             {"name": "famisly", "type": "string"},
              {"name": "onpromotion", "type": "long"},
              {"name": "weekday", "type": "string"},
              {"name": "month", "type": "long"},
