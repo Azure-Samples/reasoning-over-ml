@@ -4,6 +4,9 @@ description: Time-series forecasting to forecast store sales on data from Corpor
 name: forecasting-catboost-mlflow
 type: model
 model: azureml:forecasting-store-sales@latest
+#code_configuration:
+#  code: code
+#  scoring_script: batch_driver.py
 compute: azureml:batch-cluster
 resources:
   instance_count: 2
@@ -17,3 +20,4 @@ settings:
     timeout: 300
   error_threshold: -1
   logging_level: info
+
