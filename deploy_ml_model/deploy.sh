@@ -25,8 +25,9 @@ subscription_id=$(az account show --query id --output tsv)
 
 # Generate a unique endpoint name using the prefix
 ENDPOINT_SUFFIX=$(date +"%Y%m")
-ENDPOINT_NAME="${MODEL_NAME}-${ENDPOINT_SUFFIX}"
-DEPLOYMENT_NAME="forecasting-castboost-mlflow"
+ENDPOINT_NAME="${MODEL_NAME}-test" #${ENDPOINT_SUFFIX}"
+DEPLOYMENT_NAME="forecasting-xgboost-mlflow"
+DATA_ASSET_NAME="store-sales"
 # </set_variables>
 
 # <set_workspace>
@@ -35,16 +36,16 @@ az configure --defaults workspace="$ml_workspace" group="$resource_group"
 # </set_workspace>
 
 # <register_model>
-az ml model create --name "$MODEL_NAME" --type "mlflow_model" --path "deployment/model"
+#az ml model create --name "$MODEL_NAME" --type "mlflow_model" --path "deployment/model"
 # </register_model>
 
 # <create_data_asset>
-az ml data create -f store-dataset.yml
+#az ml data create -f store-dataset.yml
 # </create_data_asset>
 
 echo "Creating compute"
 # <create_compute>
-az ml compute create -n batch-cluster --type amlcompute --min-instances 0 --max-instances 5
+#az ml compute create -n batch-cluster --type amlcompute --min-instances 0 --max-instances 5
 # </create_compute>
 
 
@@ -65,13 +66,8 @@ az ml batch-deployment create --file deployment/deployment.yml --endpoint-name "
 
 echo "Setting traffic to 100% for deployment: $DEPLOYMENT_NAME"
 # <set_traffic>
-az ml batch-endpoint update --name "$ENDPOINT_NAME" --set "traffic.$DEPLOYMENT_NAME=100"
-# </set_traffic>
-
-echo "Updating the batch endpoint to set default deployment: $DEPLOYMENT_NAME"
-# <set_default_deployment>
 az ml batch-endpoint update --name "$ENDPOINT_NAME" --set "defaults.deployment_name=$DEPLOYMENT_NAME"
-# </set_default_deployment>
+
 
 
 echo "Showing details of the batch deployment"
@@ -94,6 +90,12 @@ if grep -q "^WORKSPACE_NAME=" "$env_file"; then
     sed -i "" "s/^WORKSPACE_NAME=.*/WORKSPACE_NAME=$ml_workspace/" "$env_file"
 else
     echo "WORKSPACE_NAME=$ml_workspace" >> "$env_file"
+fi
+
+if grep -q "^DATA_ASSET_NAME=" "$env_file"; then
+    sed -i "" "s/^DATA_ASSET_NAME=.*/DATA_ASSET_NAME=$DATA_ASSET_NAME/" "$env_file"
+else
+    echo "DATA_ASSET_NAME=$DATA_ASSET_NAME" >> "$env_file"
 fi
 
 echo "Deployment script completed successfully."
