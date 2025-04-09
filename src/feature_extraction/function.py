@@ -59,7 +59,9 @@ def get_output(job_name):
 
 
 def invoke_endpoint():
-    data_asset = ml_client.data.get("store-sales", version="latest")
+    data_asset = ml_client.data.get(
+        os.getenv("DATA_ASSET_NAME"), version=os.getenv("DATA_ASSET_VERSION", "latest")
+    )
 
     path = data_asset.path
     logging.info(f"Data asset path: {path}")
@@ -77,7 +79,7 @@ def invoke_endpoint():
     data = {
         "properties": {
             "InputData": {
-                "heart_data": {
+                os.getenv("DATA_ASSET_NAME"): {
                     "JobInputType": "UriFolder",
                     "Uri": path,
                 }
@@ -133,15 +135,14 @@ def invoke_endpoint():
 
 
 def invoke_endpoint_sdk():
-    data_asset = ml_client.data.get("heart-dataset-unlabeled", version="2")
+    data_asset = ml_client.data.get(os.getenv("DATA_ASSET_NAME"), version="2")
 
     path = data_asset.path
     logging.info(f"Data asset path: {path}")
     
-
     job = ml_client.batch_endpoints.invoke(
         ENDPOINT_NAME,
-        inputs={"heart_data": Input(path=path)}
+        inputs={"data": Input(path=path)},        
     )
 
     job_name = job.name
@@ -166,3 +167,12 @@ def invoke_endpoint_sdk():
         logging.error(f"Job failed with status: {status}")
         raise Exception(f"Job failed with status: {status}")
 
+
+
+if __name__ == "__main__":
+
+    try:
+        score = invoke_endpoint_sdk()
+        logging.info(f"Score: {score}")
+    except Exception as e:
+        logging.error(f"Error invoking endpoint: {e}")
