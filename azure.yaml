@@ -1,8 +1,8 @@
 # yaml-language-server: $schema=https://raw.githubusercontent.com/Azure/azure-dev/main/schemas/v1.0/azure.yaml.json
 
-name: aimlssistant-demo
+name: demo
 metadata:
-  template: aimlssistant-demo
+  template: demo
 hooks:
     postup:
       windows:

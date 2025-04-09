@@ -7,7 +7,7 @@ from openai.types.beta.threads import Run, Message
 import time
 import csv
 import subprocess
-from src.deploy_ml_model.create_input_data_for_model import create_input_data_for_model
+from deploy_ml_model.create_input_data_for_model import create_input_data_for_model
 from src.feature_extraction.function import invoke_endpoint_sdk
 
 # Configure logging
@@ -171,7 +171,7 @@ class AIAssistant:
 
         # Write to a CSV file
         output_dir = os.path.join(
-            os.path.dirname(__file__), "../src/deploy_ml_model/data/"
+            os.path.dirname(__file__), "../deploy_ml_model/data/"
         )
         os.makedirs(output_dir, exist_ok=True)
         output_file = os.path.join(output_dir, "output.csv")

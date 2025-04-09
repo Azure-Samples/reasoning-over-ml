@@ -1,0 +1,4 @@
+$schema: https://azuremlschemas.azureedge.net/latest/batchEndpoint.schema.json
+name: sales-store-batch
+description: Time-series forecasting to forecast store sales on data from Corporación Favorita, a large Ecuadorian-based grocery retailer - batch inference
+auth_mode: aad_token
