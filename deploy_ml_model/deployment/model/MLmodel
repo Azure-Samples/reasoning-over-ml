@@ -1,30 +1,39 @@
-artifact_path: pipeline
+artifact_path: xgb_model
 flavors:
   python_function:
-    env: conda.yaml
-    loader_module: mlflow.catboost
-    model_path: model.pkl
-    python_version: 3.12.9
-  catboost:
-    model_path: model.pkl
-    catboost_version: 1.2.7
-    model_type: CatBoostRegressor
+    data: model.xgb
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.xgboost
+    python_version: 3.12.2
+  xgboost:
+    code: null
+    data: model.xgb
+    model_class: xgboost.sklearn.XGBRegressor
+    model_format: xgb
+    xgb_version: 3.0.0
+is_signature_from_type_hint: false
+mlflow_version: 2.21.3
+model_size_bytes: 816571
+model_uuid: 73cf2cc6c5b54d6aa243a19807081001
+prompts: null
+run_id: bcecf1acb87a4c87ba554b5b591568e1
 signature:
-  inputs: '[ {"name": "store_nbr", "type": "string"},
-             {"name": "famisly", "type": "string"},
-             {"name": "onpromotion", "type": "long"},
-             {"name": "weekday", "type": "string"},
-             {"name": "month", "type": "long"},
-             {"name": "month_name", "type": "string"},
-             {"name": "year", "type": "long"},
-             {"name": "week_of_year", "type": "long"},
-             {"name": "day_of_year", "type": "long"},
-             {"name": "dcoilwtico", "type": "double"},
-             {"name": "sales_lag_21", "type": "double"},
-             {"name": "sales_lag_28", "type": "double"},
-             {"name": "sales_expanded_mean", "type": "double"},
-             {"name": "sales_rolling_mean_20", "type": "double"},
-             {"name": "sales_rolling_mean_30", "type": "double"},
-             {"name": "sales_rolling_mean_40", "type": "double"},
-             {"name": "specific_day_sales_average", "type": "double"}]'
-  outputs: '[{"type": "double"}]'
+  inputs: '[{"type": "long", "name": "store_nbr", "required": true}, {"type": "string",
+    "name": "family", "required": true}, {"type": "long", "name": "onpromotion", "required":
+    true}, {"type": "long", "name": "weekday", "required": true}, {"type": "integer",
+    "name": "month", "required": true}, {"type": "string", "name": "month_name", "required":
+    true}, {"type": "integer", "name": "year", "required": true}, {"type": "long",
+    "name": "week_of_year", "required": true}, {"type": "integer", "name": "day_of_year",
+    "required": true}, {"type": "double", "name": "dcoilwtico", "required": true},
+    {"type": "double", "name": "sales_lag_21", "required": true}, {"type": "double",
+    "name": "sales_lag_28", "required": true}, {"type": "double", "name": "sales_expanded_mean",
+    "required": true}, {"type": "double", "name": "sales_rolling_mean_20", "required":
+    true}, {"type": "double", "name": "sales_rolling_mean_30", "required": true},
+    {"type": "double", "name": "sales_rolling_mean_40", "required": true}, {"type":
+    "double", "name": "specific_day_sales_average", "required": true}]'
+  outputs: '[{"type": "tensor", "tensor-spec": {"dtype": "float32", "shape": [-1]}}]'
+  params: null
+type_hint_from_example: false
+utc_time_created: '2025-04-09 11:28:03.555986'
