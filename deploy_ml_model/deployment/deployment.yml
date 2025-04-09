@@ -1,0 +1,27 @@
+$schema: https://azuremlschemas.azureedge.net/latest/modelBatchDeployment.schema.json
+endpoint_name: sales-store-batch
+description: Time-series forecasting to forecast store sales on data from Corporación Favorita, a large Ecuadorian-based grocery retailer - batch inference
+name: forecasting-xgboost-mlflow
+type: model
+model: azureml:forecasting-store-sales@latest
+environment:
+  name: batch-mlflow-xgboost
+  image: mcr.microsoft.com/azureml/curated/mlflow-py312-inference:latest
+  conda_file: model/conda.yaml
+#code_configuration:
+#  code: code
+#  scoring_script: batch_driver.py
+compute: azureml:batch-cluster
+resources:
+  instance_count: 2
+settings:
+  max_concurrency_per_instance: 2
+  mini_batch_size: 2
+  output_action: append_row
+  output_file_name: predictions.csv
+  retry_settings:
+    max_retries: 3
+    timeout: 300
+  error_threshold: -1
+  logging_level: info
+

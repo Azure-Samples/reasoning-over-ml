@@ -16,8 +16,6 @@ param environmentName string
 })
 param location string = 'eastus'
 
-@description('Name of the resource group')
-param resourceGroupName string = ''
 
 @description('Name for the AI resource and used to derive name of dependent resources.')
 param aiHubName string = 'hub-demo'
@@ -86,7 +84,7 @@ resource resourceGroup 'Microsoft.Resources/resourceGroups@2022-09-01' = {
 }
 
 // Dependent resources for the Azure Machine Learning workspace
-module aiDependencies './agent/standard-dependent-resources.bicep' = {
+module aiDependencies './modules/standard-dependent-resources.bicep' = {
   name: '${abbrs.cognitiveServicesAccounts}${resourceToken}'
   scope: resourceGroup
   params: {
@@ -109,7 +107,7 @@ module aiDependencies './agent/standard-dependent-resources.bicep' = {
     }
 }
 
-module aiHub './agent/standard-ai-hub.bicep' = {
+module aiHub './modules/standard-ai-hub.bicep' = {
   name: '${abbrs.cognitiveServicesAIhub}${resourceToken}'
   scope: resourceGroup
   params: {
@@ -131,7 +129,7 @@ module aiHub './agent/standard-ai-hub.bicep' = {
 }
 
 
-module aiProject './agent/standard-ai-project.bicep' = {
+module aiProject './modules/standard-ai-project.bicep' = {
   name: '${abbrs.cognitiveServicesAIproject}${resourceToken}'
   scope: resourceGroup
   params: {
@@ -151,7 +149,7 @@ module aiProject './agent/standard-ai-project.bicep' = {
   }
 }
 
-module aiServiceRoleAssignments './agent/ai-service-role-assignments.bicep' = {
+module aiServiceRoleAssignments './modules/ai-service-role-assignments.bicep' = {
   name: 'aiserviceroleassignments${projectName}${resourceToken}deployment'
   scope: resourceGroup
   params: {
@@ -164,13 +162,22 @@ module aiServiceRoleAssignments './agent/ai-service-role-assignments.bicep' = {
 // App outputs
 output AZURE_LOCATION string = location
 output AZURE_TENANT_ID string = tenant().tenantId
-output RESOURCE_GROUP string = resourceGroupName
+output RESOURCE_GROUP string = '${abbrs.resourcesResourceGroups}${environmentName}'
 output PROJECT_CONNECTION_STRING string = aiProject.outputs.projectConnectionString
 output AZURE_OPENAI_MODEL_NAME string = modelName
 output AZURE_OPENAI_API_VERSION string = openaiApiVersion
 output AZURE_OPENAI_ENDPOINT string = 'https://${aiServicesName}${resourceToken}.openai.azure.com/'
+output SUBSCRIPTION_ID string = subscription().subscriptionId
 
 
-
+// module runPowerShellInlineWithOutput './modules/run_script.bicep' = {
+//   name: 'script_env${resourceToken}'
+//   scope: resourceGroup
+//   params: {
+//     // workspace organization
+//     location: location
+//     name: 'script_env'
+//   }
+// }
 
 

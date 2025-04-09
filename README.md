@@ -1,10 +1,11 @@
-# o1 reasoning over machine learning models
+# <img src="./docs/img/azure_logo.png" alt="Azure Logo" style="width:30px;height:30px;"/> o1 reasoning over machine learning models
 
-This project leverages GPT-4 to extract features and their values from user input, which are then used as input for an ML model registered with MLflow. The extracted information is subsequently provided to a GPT o1 model to reason about the output, enabling advanced reasoning capabilities over the machine learning predictions.
+This project leverages GPT-4 to extract features and their values from user input, which are then used as input for an ML model registered with MLflow. The extracted information is subsequently provided to a o1 model to reason about the output, enabling advanced reasoning capabilities over the machine learning predictions.
 
-By integrating GPT-4 and GPT o1, the project aims to enhance the interpretability and usability of machine learning models. The GPT-4 model processes user queries to identify and extract relevant features, which are then fed into the ML model. The results from the ML model are further analyzed by the GPT o1 model to provide comprehensive insights and reasoning, making the predictions more understandable and actionable for users.
+By integrating GPT-4 and o1, the project aims to enhance the interpretability and usability of machine learning models. The GPT-4 model processes user queries to identify and extract relevant features, which are then fed into the ML model. The results from the ML model are further analyzed by the GPT o1 model to provide comprehensive insights and reasoning, making the predictions more understandable and actionable for users.
 
-This approach not only improves the accuracy of the predictions but also provides a deeper understanding of the underlying data and model behavior, facilitating better decision-making and more effective utilization of machine learning in various applications.
+This repository also supports calling batch endpoints in the assistant. By deploying an MLflow model from the `deployment-custom` folder, you can integrate batch endpoint results with the o1 model in various automated ways.
+
 
 ## Prerequisites
 + [azd](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd), used to deploy all Azure resources and assets used in this sample.
@@ -31,11 +32,26 @@ This sample uses [`azd`](https://learn.microsoft.com/azure/developer/azure-devel
 
 ## Features
 
-This project framework provides the following features:
+This project includes several key features that enhance its functionality and usability:
 
-* Feature 1
-* Feature 2
-* ...
+1. **Feature Extraction**: Utilizes GPT-4 to extract relevant features and their values from user input, ensuring accurate and meaningful data is fed into the ML model.
+
+2. **ML Model Integration**: Integrates with MLflow to use pre-registered machine learning models, facilitating seamless predictions based on the extracted features.
+
+3. **Advanced Reasoning**: Employs an o1 model to reason about the ML model's output, providing deeper insights and interpretability of the predictions.
+
+4. **Automated Deployment**: Uses `azd` and Bicep templates for automated deployment of Azure resources, simplifying the setup process.
+
+5. **Streamlit interface**: TODO
+
+Consider starting with GPT-4 to gather and refine information, then pass the output to the o1 model. This approach leverages the threading feature for further analysis or other tasks, expanding on the initial response for deeper insights.
+
+To-dos:
+
+- Implement a parser in case the user wants to provide just an Excel file with features.
+- Implement a method that sends the outputs directly to O1, in case the user already has the outputs and does not wish to execute the batch endpoint.
+- Implement streamlit interface
+
 
 ## Getting Started
 
@@ -59,34 +75,17 @@ pip install -r requirements.txt
 
 This script requires running the `deploy.sh` script located in the `deploy-ml-model` folder first.
 
+This will deploy an MLflow model located in the `deployment-custom` folder. However, there are various automated ways to deploy this batch endpoint. This example demonstrates how to use results from batch endpoints in GPT models.
+
 ```bash
 cd deploy-ml-model
 ./deploy.sh
 ```
 
-### Prerequisites
+Before proceeding, ensure that your storage account meets the following requirements:
 
-(ideally very short, if any)
-
-- OS
-- Library version
-- ...
-
-### Installation
-
-(ideally very short)
-
-- npm install [package name]
-- mvn install
-- ...
-
-### Quickstart
-(Add steps to get up and running quickly)
-
-1. git clone [repository clone url]
-2. cd [repository name]
-3. ...
-
+- Storage account key access is enabled.
+- Connections are allowed from all networks or from your specific IP.
 
 ## Demo
 
@@ -143,7 +142,6 @@ assistant: age,sex,cp,trestbps,chol,fbs,restecg,thalach,exang,oldpeak,slope,ca,t
 INFO:root:Tests passed:
 ============================= test session starts =============================
 platform win32 -- Python 3.12.8, pytest-8.3.4, pluggy-1.5.0
-rootdir: C:\Users\karinaa\OneDrive - Microsoft\Documents\codes\azure-samples\gbbai-o1-reasoning-over-ml
 plugins: anyio-4.8.0, Faker-33.3.0
 collected 1 item
 
@@ -161,7 +159,6 @@ INFO:root:Invoke endpoint...
 Request method: 'GET'
 Request headers:
     'Accept': 'application/json'
-    'x-ms-client-request-id': '96e3d8ba-d11d-11ef-9fec-8c3b4a55ecfb'
     'User-Agent': 'azure-ai-ml/1.23.1 azsdk-python-mgmt-machinelearningservices/0.1.0 Python/3.12.8 (Windows-11-10.0.22631-SP0)'
     'Authorization': 'REDACTED'
 
@@ -173,9 +170,11 @@ INFO:root:Job status: Running. Waiting for 10 seconds before checking again...
 INFO:root:Job status: Running. Waiting for 10 seconds before checking again...
 INFO:root:Job status: Running. Waiting for 10 seconds before checking again...
 
-────────────────────────────────────────────────────────────────────────────
+
+
+---
 1. Overview of the Predictions
-────────────────────────────────────────────────────────────────────────────
+---
 
 • “prediction = 0” usually indicates the model predicts “no presence of heart disease.”
 • “prediction = 1” usually indicates the model predicts “presence of heart disease.”
@@ -190,9 +189,9 @@ For example, in your provided results:
 
 Most of the predictions here are 0, with a subset indicated as 1. That distribution can happen if the model sees fewer patients with strong risk factors or if the data share many characteristic patterns that align with “no presence of heart disease.”
 
-────────────────────────────────────────────────────────────────────────────
+---
 2. Key Features Influencing Predictions
-────────────────────────────────────────────────────────────────────────────
+---
 
 Even though we cannot see the exact features for each row, these are some of the important variables that typically influence a heart-disease classification model:
 
@@ -226,9 +225,9 @@ Even though we cannot see the exact features for each row, these are some of the
 10) Thalassemia (thal):
    - Certain results (like “fixed” or “reversible”) can point to underlying heart stress.
 
-────────────────────────────────────────────────────────────────────────────
+---
 3. Why Rows Might Differ
-────────────────────────────────────────────────────────────────────────────
+---
 
 • Each row represents a different patient or measurement set. Small differences in features (like whether chest pain is typical or atypical, how high the cholesterol is, or if someone experiences exercise-induced chest pain) can cause large changes in the model’s predicted probability.
 
@@ -238,9 +237,9 @@ Even though we cannot see the exact features for each row, these are some of the
 
 • A row receiving a “0” suggests the model found that patient’s features more closely match individuals without heart disease.
 
-────────────────────────────────────────────────────────────────────────────
+---
 4. Interpreting the Distribution of 0s and 1s
-────────────────────────────────────────────────────────────────────────────
+---
 
 • High Frequency of Prediction “0”:
   If most of the rows have a predicted label “0,” the data for those specific patients likely resembled lower-risk patterns. Perhaps their test results (like chest pain type, cholesterol, blood pressure) did not align with the typical high-risk profiles learned by the model.
@@ -248,9 +247,9 @@ Even though we cannot see the exact features for each row, these are some of the
 • Why Some Rows Are “1”:
   Where you see a “1,” the model likely identified risk factors or combinations of features frequently observed in individuals who do have heart disease. Examples might include older age, a higher cholesterol reading, presence of typical angina, certain ECG abnormalities, or other strong signals commonly associated with heart disease.
 
-────────────────────────────────────────────────────────────────────────────
+---
 5. Limitations and Cautions
-────────────────────────────────────────────────────────────────────────────
+---
 
 1) Model Limitations:
    - No model is perfect. It might produce false positives (predicting “1” when the individual does not have heart disease) or false negatives (predicting “0” when the individual does have heart disease).
@@ -261,9 +260,9 @@ Even though we cannot see the exact features for each row, these are some of the
 3) No Substitute for Medical Advice:
    - Even though the model is designed to help identify risk of heart disease, it cannot give a definitive conclusion about an individual’s health. A qualified medical professional should interpret the results and conduct further tests as necessary.
 
-────────────────────────────────────────────────────────────────────────────
+---
 6. Summing Up
-────────────────────────────────────────────────────────────────────────────
+---
 
 • Each row’s “0” or “1” classification is the model’s best guess about the presence of heart disease based on the patterns it has learned from historical data.
 • A “1” typically flags potential concern, suggesting that the individual’s pattern of inputs (age, cholesterol, chest pain type, etc.) is consistent with heart-disease-positive cases seen during training.
