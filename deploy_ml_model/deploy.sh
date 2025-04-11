@@ -36,16 +36,16 @@ az configure --defaults workspace="$ml_workspace" group="$resource_group"
 # </set_workspace>
 
 # <register_model>
-#az ml model create --name "$MODEL_NAME" --type "mlflow_model" --path "deployment/model"
+az ml model create --name "$MODEL_NAME" --type "mlflow_model" --path "deployment/model"
 # </register_model>
 
 # <create_data_asset>
-#az ml data create -f store-dataset.yml
+az ml data create -f store-dataset.yml
 # </create_data_asset>
 
 echo "Creating compute"
 # <create_compute>
-#az ml compute create -n batch-cluster --type amlcompute --min-instances 0 --max-instances 5
+az ml compute create -n batch-cluster --type amlcompute --min-instances 0 --max-instances 5
 # </create_compute>
 
 
