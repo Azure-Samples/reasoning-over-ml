@@ -2,7 +2,7 @@ black
 azure-identity
 openai>=1.37.1, <2.0.0
 python-dotenv>=1.0.1, <2.0.0
-ipykernel<=6.8.0
+ipykernel
 faker
 google-cloud-bigquery
 azure-search-documents==11.4.0
@@ -17,3 +17,7 @@ azure-ai-ml
 azure-ai-projects 
 azure-ai-inference 
 azure-identity
+matplotlib
+scikit-learn
+xgboost
+catboost

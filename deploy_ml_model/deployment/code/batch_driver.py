@@ -6,20 +6,17 @@ import glob
 import mlflow
 import pandas as pd
 import logging
-from pathlib import Path
 
 
 def init():
     global model
     global model_input_types
     global model_output_names
-    global output_path
 
     # AZUREML_MODEL_DIR is an environment variable created during deployment
     # It is the path to the model folder
-    # Please provide your model's folder name if there's one:
+    # Please provide your model's folder name if there's one
     model_path = glob.glob(os.environ["AZUREML_MODEL_DIR"] + "/*/")[0]
-    output_path = os.environ["AZUREML_BI_OUTPUT_PATH"]
 
     # Load the model, it's input types and output names
     model = mlflow.pyfunc.load(model_path)
@@ -43,22 +40,23 @@ def init():
 
 
 def run(mini_batch):
-    for file_path in mini_batch:
-        data = pd.read_csv(file_path)
+    print(f"run method start: {__file__}, run({len(mini_batch)} files)")
 
-        if model_input_types:
-            data = data.astype(model_input_types)
+    data = pd.concat(
+        map(
+            lambda fp: pd.read_csv(fp).assign(filename=os.path.basename(fp)), mini_batch
+        )
+    )
 
-        pred = model.predict(data)
+    if model_input_types:
+        data = data.astype(model_input_types)
 
-        if pred is not pd.DataFrame:
-            if not model_output_names:
-                model_output_names = ["pred_col" + str(i) for i in range(pred.shape[1])]
-            pred = pd.DataFrame(pred, columns=model_output_names)
+    # Predict over the input data, minus the column filename which is not part of the model.
+    pred = model.predict(data.drop("filename", axis=1))
 
-        output_file_name = Path(file_path).stem
-        output_file_path = os.path.join(output_path, output_file_name + ".parquet")
-        data = pd.concat([data, pred], axis=1)
-        data.to_parquet(output_file_path)
+    if pred is not pd.DataFrame:
+        if not model_output_names:
+            model_output_names = ["pred_col" + str(i) for i in range(pred.shape[1])]
+        pred = pd.DataFrame(pred, columns=model_output_names)
 
-        yield True
+    return pd.concat([data, pred], axis=1)

@@ -1,172 +1,147 @@
-# <img src="./docs/img/azure_logo.png" alt="Azure Logo" style="width:30px;height:30px;"/> o1 reasoning over machine learning models
+# <img src="./docs/img/azure_logo.png" alt="Azure Logo" style="width:30px;height:30px;"/> AOAI Reasoning Models over Machine Learning Custom Models
 
-This project leverages GPT-4 to extract features and their values from user input, which are then used as input for an ML model registered with MLflow. The extracted information is subsequently provided to a o1 model to reason about the output, enabling advanced reasoning capabilities over the machine learning predictions.
+This project harnesses the power of AOAI to extract key features and their corresponding values from user input, which are then passed to an ML model managed via MLflow. The output from the ML model is subsequently fed into a reasoning model, enabling advanced interpretation and analysis of the predictions.
 
-By integrating GPT-4 and o1, the project aims to enhance the interpretability and usability of machine learning models. The GPT-4 model processes user queries to identify and extract relevant features, which are then fed into the ML model. The results from the ML model are further analyzed by the GPT o1 model to provide comprehensive insights and reasoning, making the predictions more understandable and actionable for users.
+By integrating GPT-4 (or GPT-4o) with dedicated reasoning models, the project enhances the interpretability and practical utility of machine learning outcomes. GPT-4 processes user queries to identify and extract pertinent features that guide the ML model in generating predictions, after which the reasoning model scrutinizes these predictions to offer detailed insights, making the results more understandable and actionable.
 
-This repository also supports calling batch endpoints in the assistant. By deploying an MLflow model from the `deployment-custom` folder, you can integrate batch endpoint results with the o1 model in various automated ways.
+This repository also facilitates batch endpoint calls within the assistant. By deploying an MLflow model from the deploy-ml-model folder, users can seamlessly integrate batch endpoint results with the reasoning model, enabling automated and scalable workflows.
 
+## Key Features Overview
 
-## Prerequisites
-+ [azd](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd), used to deploy all Azure resources and assets used in this sample.
+This project is designed to seamlessly enhance your machine learning workflows with cutting-edge capabilities that combine feature extraction, model integration, and advanced feature engineering.
 
-+ [PowerShell Core pwsh](https://github.com/PowerShell/powershell/releases) if using Windows
+### 1. Advanced Feature Extraction
+- Leverages GPT-4 to automatically identify and extract relevant features and corresponding values from user input.
+- Ensures that the data fed into the ML model is both precise and meaningful.
 
-+ Python 3.11
+### 2. ML Model Integration
+- Integrates with MLflow to utilize pre-registered machine learning models for generating accurate predictions.
+- Detailed guidance is available for creating and configuring MLflow model artifacts, including best practices for endpoint batch deployments.
 
-## Setup environment
+### 3. Effective Model Deployment
+- Provides instructions for deploying the ML model so the assistant can explain predictions effectively after endpoint calls.
+- For step-by-step guidance on deploying the ML model and setting up the endpoint, please refer to the [deploy_ml_model Readme](train/README.md). This document offers detailed instructions on configuring your environment, deploying the model, and verifying the deployment.
 
-This sample uses [`azd`](https://learn.microsoft.com/azure/developer/azure-developer-cli/) and a bicep template to deploy all Azure resources, including the Azure OpenAI models.
+### 4. Enhanced Feature Engineering
+- **Feature Identification:** Automatically recognizes and extracts key features from raw data inputs.
+- **Data Refinement:** Suggests optimal transformations and engineering techniques aligned with model requirements.
+- **Seamless Pipeline Integration:** Incorporates engineered features into the model training and evaluation workflow, boosting overall predictive performance.
 
-1. Login to your Azure account: `azd auth login`
+*Note: Some functionalities, especially within feature engineering, are under active development. Stay tuned for continuous updates and improvements!*
 
-2. Create an environment: `azd env new`
+### 5. **Streamlit Interface** (To Be Implemented)
 
-3. Run `azd up`.
+*Note: Some functionalities, especially within feature engineering, are under active development. Stay tuned for continuous updates and improvements!*
 
-   + Choose a name for your resourge group.
-   + Enter a region for the resources.
+TODO:
 
-   The deployment creates multiple Azure resources and runs multiple jobs. It takes several minutes to complete. The deployment is complete when you get a command line notification stating "SUCCESS: Your up workflow to provision and deploy to Azure completed."
-
-
-## Features
-
-This project includes several key features that enhance its functionality and usability:
-
-1. **Feature Extraction**: Utilizes GPT-4 to extract relevant features and their values from user input, ensuring accurate and meaningful data is fed into the ML model.
-
-2. **ML Model Integration**: Integrates with MLflow to use pre-registered machine learning models, facilitating seamless predictions based on the extracted features.
-
-3. **Advanced Reasoning**: Employs an o1 model to reason about the ML model's output, providing deeper insights and interpretability of the predictions.
-
-4. **Automated Deployment**: Uses `azd` and Bicep templates for automated deployment of Azure resources, simplifying the setup process.
-
-5. **Streamlit interface**: TODO
-
-Consider starting with GPT-4 to gather and refine information, then pass the output to the o1 model. This approach leverages the threading feature for further analysis or other tasks, expanding on the initial response for deeper insights.
-
-To-dos:
-
-- Implement a parser in case the user wants to provide just an Excel file with features.
+- Implement a parser for when the user provides just an Excel file with features.
 - Implement a method that sends the outputs directly to O1, in case the user already has the outputs and does not wish to execute the batch endpoint.
-- Implement streamlit interface
-
+- Implement the Streamlit interface.
 
 ## Getting Started
 
+### Prerequisites
+
+- Ensure you have an active Azure subscription.
+- [azd](https://learn.microsoft.com/azure/developer/azure-developer-cli/install-azd), used to deploy all Azure resources and assets used in this sample.
+- [PowerShell Core pwsh](https://github.com/PowerShell/powershell/releases) if using Windows.
+- Python 3.11.
+- Confirm that you have the required ML libraries installed.
+
 ### Setup
 
-To setup the project, clone the repository and install the dependencies:
+To set up the project, clone the repository and install the dependencies:
 
 ```bash
-git https://github.com/Azure-Samples/gbbai-o1-reasoning-over-ml
+git clone https://github.com/Azure-Samples/reasoning-over-ml
 cd gbbai-o1-reasoning-over-ml
 
 python -m venv venv
-source venv/bin/activate -> MAC
-or
-.\venv\Scripts\activate -> Windows
+# For macOS:
+source venv/bin/activate
+# For Windows:
+.\venv\Scripts\activate
 
 pip install -r requirements.txt
 ```
 
-### ML Model Deployment
+### Setup Environment
 
-This script requires running the `deploy.sh` script located in the `deploy-ml-model` folder first.
+This sample uses [`azd`](https://learn.microsoft.com/azure/developer/azure-developer-cli/) and a bicep template to deploy all Azure resources, including the Azure OpenAI models.
 
-This will deploy an MLflow model located in the `deployment-custom` folder. However, there are various automated ways to deploy this batch endpoint. This example demonstrates how to use results from batch endpoints in GPT models.
+1. Login to your Azure account:
+   `azd auth login`
 
-```bash
-cd deploy-ml-model
-./deploy.sh
-```
+2. Create an environment:
+   `azd env new`
 
+3. Run `azd up`:
+   - Choose a name for your resource group.
+   - Enter a region for the resources.
+
+   The deployment creates multiple Azure resources and runs several jobs. It may take several minutes to complete. The deployment is complete when you receive a command line notification stating "SUCCESS: Your up workflow to provision and deploy to Azure completed."
 
 ## Demo
 
-
 To run the demo, follow these steps:
 
-1. **Setup the infrastructure**: Prepare the necessary resources and environment.
-2. **Deploy the model and the endpoint**: Follow the instructions to deploy the ML model and set up the endpoint.
-3. **Ask the questions**: Interact with the deployed model by asking relevant questions.
+1. **Setup the Infrastructure:** Prepare the necessary resources and environment.
+2. **Deploy the Model and Endpoint:** Follow the instructions to deploy the ML model and set up the endpoint.
+3. **Ask the Questions:** Interact with the deployed model by asking relevant questions.
 
+The `main.py` script proceeds with the following steps:
 
-The `main.py` script will proceed with the following steps:
+1. **Ask a Question:** The user inputs a question.
 
-1. **Ask a question**: The user inputs a question.
+   ### Example Question
 
-    ### Example question
+   Q: dataset includes the following attributes: age (63), sex (1), cp (1), trestbps (145), chol (233), fbs (1), restecg (2), thalach (150), exang (0), oldpeak (2.3), slope (3), ca (0), and thal (fixed)
 
-    Q: dataset includes the following attributes: age (63), sex (1), cp (1), trestbps (145), chol (233), fbs (1), restecg (2), thalach (150), exang (0), oldpeak (2.3), slope (3), ca (0), and thal (fixed)
+2. **Extract Features and Their Values:** The script extracts relevant features and their values from the question.
+3. **Save Data as an Asset:** The extracted data is saved as an asset in the ML workspace.
 
-2. **Extract features and their values**: The script extracts relevant features and their values from the question.
-3. **Save data as an asset**: The extracted data is saved as an asset in the ML workspace.
+## Example Output from main.py and Using O1 to Explain ML Predictions
 
+Logging Results:
 
-To access the ML model, you can visit the following link:
-
-https://github.com/Azure/azureml-examples/tree/main/cli/endpoints/batch/deploy-models/heart-classifier-mlflow/deployment-simple
-
-This link directs you to an example repository on GitHub provided by Azure. It contains instructions and code for deploying a heart classifier ML model using MLflow in a simple deployment setup. You can follow the steps in the repository to understand how to deploy and use the model.
-
-
-
-## Resources
-
-(Any additional resources or related projects)
-
-- Link to supporting information
-- Link to similar sample
-- ...
-
-
-## Example of output by executing the main.py
-
-Some loggings results
-
-
-> 
-INFO:azure.identity._credentials.environment:No environment configuration found.
-
-INFO:root:
-assistant: age,sex,cp,trestbps,chol,fbs,restecg,thalach,exang,oldpeak,slope,ca,thal
-63,1,1,145,233,1,2,150,0,2.3,3,0,fixed
-67,1,4,160,286,0,2,108,1,1.5,2,3,norma
-
-INFO:root:Tests passed:
-============================= test session starts =============================
-platform win32 -- Python 3.12.8, pytest-8.3.4, pluggy-1.5.0
-plugins: anyio-4.8.0, Faker-33.3.0
-collected 1 item
-
-test\schema.py .                                                         [100%]
-
-============================== 1 passed in 1.54s ==============================
-
-INFO:root:Creating input data asset for model...
-INFO:src.deploy_ml_model.create_input_data_for_model:Creating input data asset for model...
-
-Uploading data (0.0 MBs): 100%|######################################################################| 154/154 [00:00<00:00, 1969.57it/s] 
-
-INFO:root:Invoke endpoint...
-
-Request method: 'GET'
-Request headers:
-    'Accept': 'application/json'
-    'User-Agent': 'azure-ai-ml/1.23.1 azsdk-python-mgmt-machinelearningservices/0.1.0 Python/3.12.8 (Windows-11-10.0.22631-SP0)'
-    'Authorization': 'REDACTED'
-
-INFO:root:Data asset path: 
-INFO:azure.identity._internal.decorators:AzureCliCredential.get_token_info succeeded
-
-INFO:root:Job name: batchjob-c4e096a3-198d-448c-a501-deca591c7130
-INFO:root:Job status: Running. Waiting for 10 seconds before checking again...
-INFO:root:Job status: Running. Waiting for 10 seconds before checking again...
-INFO:root:Job status: Running. Waiting for 10 seconds before checking again...
-
-
+> INFO:azure.identity._credentials.environment:No environment configuration found.
+>
+> INFO:root:
+> assistant: age,sex,cp,trestbps,chol,fbs,restecg,thalach,exang,oldpeak,slope,ca,thal
+> 63,1,1,145,233,1,2,150,0,2.3,3,0,fixed
+> 67,1,4,160,286,0,2,108,1,1.5,2,3,norma
+>
+> INFO:root:Tests passed:
+> ============================= test session starts =============================
+> platform win32 -- Python 3.12.8, pytest-8.3.4, pluggy-1.5.0
+> plugins: anyio-4.8.0, Faker-33.3.0
+> collected 1 item
+>
+> test\schema.py .                                                         [100%]
+>
+> ============================== 1 passed in 1.54s ==============================
+>
+> INFO:root:Creating input data asset for model...
+> INFO:src.deploy_ml_model.create_input_data_for_model:Creating input data asset for model...
+>
+> Uploading data (0.0 MBs): 100%|######################################################################| 154/154 [00:00<00:00, 1969.57it/s]
+>
+> INFO:root:Invoke endpoint...
+>
+> Request method: 'GET'
+> Request headers:
+>     'Accept': 'application/json'
+>     'User-Agent': 'azure-ai-ml/1.23.1 azsdk-python-mgmt-machinelearningservices/0.1.0 Python/3.12.8 (Windows-11-10.0.22631-SP0)'
+>     'Authorization': 'REDACTED'
+>
+> INFO:root:Data asset path:
+> INFO:azure.identity._internal.decorators:AzureCliCredential.get_token_info succeeded
+>
+> INFO:root:Job name: batchjob-c4e096a3-198d-448c-a501-deca591c7130
+> INFO:root:Job status: Running. Waiting for 10 seconds before checking again...
+> INFO:root:Job status: Running. Waiting for 10 seconds before checking again...
+> INFO:root:Job status: Running. Waiting for 10 seconds before checking again...
 
 ---
 1. Overview of the Predictions
@@ -175,93 +150,89 @@ INFO:root:Job status: Running. Waiting for 10 seconds before checking again...
 • “prediction = 0” usually indicates the model predicts “no presence of heart disease.”
 • “prediction = 1” usually indicates the model predicts “presence of heart disease.”
 
-These predictions are based on the input features the model uses (age, sex, chest pain type, blood pressure, cholesterol, etc.). Each row in your list corresponds to a patient (or a single data point), the model’s decision (0 or 1), and the filename “heart-unlabeled-0.csv.”
+These predictions are based on the input features used by the model (age, sex, chest pain type, blood pressure, cholesterol, etc.). Each row corresponds to a patient (or a single data point), the model’s decision (0 or 1), and a filename like “heart-unlabeled-0.csv.”
 
-For example, in your provided results:
-• Row 0 has prediction 0.1 in your text, which might reflect either a probability or a slight formatting irregularity, but generally is associated with “no heart disease” (0).
-• Row 1 has prediction 1 → “model suggests presence of heart disease.”
-• Row 2 has prediction 0 → “model suggests no heart disease.”
-• And so forth…
+For example, in the provided results:
+• Row 0 shows a prediction of 0.1, which might reflect a probability or slight formatting irregularity, but generally is associated with “no heart disease” (0).
+• Row 1 shows a prediction of 1, indicating the model suggests the presence of heart disease.
+• Row 2 shows a prediction of 0, suggesting the model indicates no heart disease.
 
-Most of the predictions here are 0, with a subset indicated as 1. That distribution can happen if the model sees fewer patients with strong risk factors or if the data share many characteristic patterns that align with “no presence of heart disease.”
+Most predictions are 0, with a few indicated as 1. This pattern can occur if the model sees fewer patients with strong risk factors or if the data resemble lower-risk profiles overall.
 
 ---
 2. Key Features Influencing Predictions
 ---
 
-Even though we cannot see the exact features for each row, these are some of the important variables that typically influence a heart-disease classification model:
+Even though exact features per row are not displayed, key variables typically influencing a heart-disease classification model include:
 
 1) Chest Pain Type (cp):
-   - Certain types of chest pain (like typical angina) more strongly correlate with heart disease.
+   - Certain types, such as typical angina, strongly correlate with heart disease.
 
 2) Age:
-   - As age increases, risk factors for heart disease can become more prominent.
+   - Increased age can heighten the risk factors for heart disease.
 
 3) Sex:
-   - Sex can influence heart disease risk (e.g., in many datasets, male (1) has a slightly higher reported risk).
+   - Risk factors may vary by sex; in many datasets, male (1) may have a slightly higher risk.
 
 4) Blood Pressure (trestbps):
-   - Higher resting blood pressure can be correlated with increased cardiovascular risk.
+   - Higher resting blood pressure can correlate with increased cardiovascular risk.
 
 5) Cholesterol (chol):
-   - Elevated cholesterol levels often factor into the likelihood the model assigns for heart disease.
+   - Elevated cholesterol often factors into the model’s prediction for heart disease.
 
 6) Maximum Heart Rate (thalach):
-   - Lower achievable heart rate can correlate with higher risk.
+   - Lower maximum heart rate can be associated with higher risk.
 
 7) Exercise-Induced Angina (exang):
-   - Angina (chest pain) triggered by exercise is a known risk indicator.
+   - Chest pain triggered by exercise is a known risk indicator.
 
 8) ST Depression (oldpeak) & Slope of the ST Segment (slope):
-   - These ECG-related features often strongly correlate with heart conditions; a higher oldpeak or certain slopes tend to increase suspicion of heart disease.
+   - Certain ECG features can indicate higher risk for heart conditions.
 
 9) Number of Major Vessels Colored (ca):
-   - More vessels with issues can indicate higher risk.
+   - A higher count may indicate elevated risk.
 
 10) Thalassemia (thal):
-   - Certain results (like “fixed” or “reversible”) can point to underlying heart stress.
+   - Values like “fixed” or “reversible” can indicate underlying cardiac stress.
 
 ---
 3. Why Rows Might Differ
 ---
 
-• Each row represents a different patient or measurement set. Small differences in features (like whether chest pain is typical or atypical, how high the cholesterol is, or if someone experiences exercise-induced chest pain) can cause large changes in the model’s predicted probability.
-
-• Because the model is trained to weigh all features together (e.g., possibly via a logistic regression, random forest, or similar supervised learning approach), it looks for patterns in the patient’s data that best match known cases with or without heart disease.
-
-• A row receiving a “1” suggests that, upon examining these features, the model found it more likely than not that the patient’s data resemble past cases of heart disease.
-
-• A row receiving a “0” suggests the model found that patient’s features more closely match individuals without heart disease.
+• Each row represents a different patient or measurement set. Small differences in features, like variations in chest pain type or cholesterol levels, can lead to different predictions.
+• The model weighs all features—using methods such as logistic regression or random forest—to match input patterns with historical data.
+• A row with a prediction of “1” suggests that the patient’s data resemble cases of heart disease, whereas a “0” suggests a closer match to patients without heart disease.
 
 ---
 4. Interpreting the Distribution of 0s and 1s
 ---
 
-• High Frequency of Prediction “0”:
-  If most of the rows have a predicted label “0,” the data for those specific patients likely resembled lower-risk patterns. Perhaps their test results (like chest pain type, cholesterol, blood pressure) did not align with the typical high-risk profiles learned by the model.
-
-• Why Some Rows Are “1”:
-  Where you see a “1,” the model likely identified risk factors or combinations of features frequently observed in individuals who do have heart disease. Examples might include older age, a higher cholesterol reading, presence of typical angina, certain ECG abnormalities, or other strong signals commonly associated with heart disease.
+• High Frequency of Prediction “0”: 
+  Indicates that most patients have data that align with lower risk.
+  
+• Occurrence of Prediction “1”: 
+  Highlights patients whose features strongly match historical patterns of heart disease.
 
 ---
 5. Limitations and Cautions
 ---
 
 1) Model Limitations:
-   - No model is perfect. It might produce false positives (predicting “1” when the individual does not have heart disease) or false negatives (predicting “0” when the individual does have heart disease).
-
-2) Quality of the Data:
-   - Predictions ultimately rely on the quality, completeness, and representativeness of the input features.
-
-3) No Substitute for Medical Advice:
-   - Even though the model is designed to help identify risk of heart disease, it cannot give a definitive conclusion about an individual’s health. A qualified medical professional should interpret the results and conduct further tests as necessary.
+   - No model is infallible; false positives and negatives can occur.
+2) Data Quality:
+   - The accuracy of predictions relies on the quality, completeness, and representativeness of the input features.
+3) Not a Substitute for Medical Advice:
+   - The model’s output is not a definitive diagnosis. Always consult a qualified medical professional for proper evaluation and diagnosis.
 
 ---
 6. Summing Up
 ---
 
-• Each row’s “0” or “1” classification is the model’s best guess about the presence of heart disease based on the patterns it has learned from historical data.
-• A “1” typically flags potential concern, suggesting that the individual’s pattern of inputs (age, cholesterol, chest pain type, etc.) is consistent with heart-disease-positive cases seen during training.
-• A “0” suggests the model did not detect strong patterns indicative of heart disease and found it more likely the individual was disease-free in similar cases from past data.
+• Each row’s classification (0 or 1) reflects the model’s best guess about the presence of heart disease.
+• A prediction of “1” flags potential concern by identifying high-risk input patterns, while “0” suggests the opposite.
+• Interpretation should combine model insights with clinical judgment and further diagnostics.
 
-Overall, these predictions reflect how the ML model has interpreted the provided features. While the model’s probabilities may sometimes appear near a threshold (e.g., “0.1” or “0.9”), the final classification usually comes down to whether it crosses a specific decision boundary. Interpretation should therefore be combined with clinical judgment, additional diagnostics, and medical expertise.
+## Resources
+
+- [Azure OpenAI Documentation](https://learn.microsoft.com/azure/cognitive-services/openai/)
+- Additional links and references as required.
