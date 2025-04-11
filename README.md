@@ -20,7 +20,7 @@ This project is designed to seamlessly enhance your machine learning workflows w
 
 ### 3. Effective Model Deployment
 - Provides instructions for deploying the ML model so the assistant can explain predictions effectively after endpoint calls.
-- For step-by-step guidance on deploying the ML model and setting up the endpoint, please refer to the [deploy_ml_model Readme](train/READNE.md). This document offers detailed instructions on configuring your environment, deploying the model, and verifying the deployment.
+- For step-by-step guidance on deploying the ML model and setting up the endpoint, please refer to the [deploy_ml_model Readme](train/README.md). This document offers detailed instructions on configuring your environment, deploying the model, and verifying the deployment.
 
 ### 4. Enhanced Feature Engineering
 - **Feature Identification:** Automatically recognizes and extracts key features from raw data inputs.
