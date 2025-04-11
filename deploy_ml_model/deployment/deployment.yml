@@ -5,12 +5,12 @@ name: forecasting-xgboost-mlflow
 type: model
 model: azureml:forecasting-store-sales@latest
 environment:
-  name: batch-mlflow-xgboost
-  image: mcr.microsoft.com/azureml/curated/mlflow-py312-inference:latest
+  name: batch-env-xgboost
+  image: mcr.microsoft.com/azureml/openmpi4.1.0-ubuntu20.04:latest
   conda_file: model/conda.yaml
-#code_configuration:
-#  code: code
-#  scoring_script: batch_driver.py
+code_configuration:
+  code: code
+  scoring_script: batch_driver.py
 compute: azureml:batch-cluster
 resources:
   instance_count: 2
