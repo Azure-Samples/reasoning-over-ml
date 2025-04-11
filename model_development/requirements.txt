@@ -1,0 +1,15 @@
+black
+azure-identity
+python-dotenv>=1.0.1, <2.0.0
+ipykernel
+azure-core
+pandas
+chardet
+setuptools
+azure-ai-ml
+azure-ai-projects 
+azure-ai-inference 
+azure-identity
+scikit-learn
+xgboost
+catboost
