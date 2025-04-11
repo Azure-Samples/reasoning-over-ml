@@ -17,3 +17,7 @@ azure-ai-ml
 azure-ai-projects 
 azure-ai-inference 
 azure-identity
+matplotlib
+scikit-learn
+xgboost
+catboost
