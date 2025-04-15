@@ -22,3 +22,4 @@ catboost
 protobuf>=5.26.1,<6.0dev
 psutil>=5.9,<7
 seaborn
+shap
