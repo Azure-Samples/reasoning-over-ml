@@ -1,7 +1,7 @@
 import os
 import pickle
 import pandas as pd
-
+from shap import TreeExplainer
 
 def init():
     global model
@@ -12,11 +12,14 @@ def init():
     # Get the model path from the environment variable
     root_path = os.path.join(os.environ["AZUREML_MODEL_DIR"], "model_artifacts")
     model_path = os.path.join(root_path,  "model.pkl")
-
+    
     # Load the model
     with open(model_path, 'rb') as f:
-        model = pickle.load(f)
+        model = pickle.load(f)    
 
+    # Load the explainer
+    explainer = TreeExplainer(model)
+    
     # Load the dtypes
     dtypes_path = os.path.join(root_path, 'X_test.pkl')    
     with open(dtypes_path, 'rb') as f:
@@ -24,12 +27,7 @@ def init():
         dtypes = dataset.dtypes.to_dict()
     
     # Load the columns
-    columns = dataset.columns.tolist()
-    
-    # Load the shap explainer
-    explainer_path = os.path.join(root_path, 'explainer.pkl')
-    with open(explainer_path, 'rb') as f:
-        explainer = pickle.load(f)
+    columns = dataset.columns.tolist()   
     
     print('Model, dtypes and explainer loaded successfully')
    

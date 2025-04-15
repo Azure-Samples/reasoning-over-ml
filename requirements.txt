@@ -7,7 +7,7 @@ faker
 google-cloud-bigquery
 azure-search-documents==11.4.0
 azure-core
-pandas
+pandas==1.3.5
 chardet
 pytest
 mltable
