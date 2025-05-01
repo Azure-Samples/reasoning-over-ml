@@ -9,7 +9,7 @@ class RetrievalPlugin:
         self.file_path = os.getenv('SHAP_DATASET_FILE_PATH')
 
     @kernel_function(name="RawShapValues",
-                     description="Retrieve the raw shap-values from a file.")
+                     description="Retrieve the raw shap-values.")
     async def retrieve_shap_values(self) -> dict:
         """Retrieve shap values."""
         # Get the file path from the environment variable

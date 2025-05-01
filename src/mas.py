@@ -112,7 +112,7 @@ class Orchestrator:
                         analyst_agent, 
                         agent_reviewer],
                 termination_strategy=ApprovalTerminationStrategy(agents=[agent_reviewer],                                                                  
-                                                                 maximum_iterations=2),
+                                                                 maximum_iterations=3),
                 selection_strategy=SelectionStrategy(),  
                 )
 
