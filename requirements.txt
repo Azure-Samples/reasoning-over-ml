@@ -4,8 +4,6 @@ openai>=1.37.1, <2.0.0
 python-dotenv>=1.0.1, <2.0.0
 ipykernel
 faker
-google-cloud-bigquery
-azure-search-documents==11.4.0
 azure-core
 pandas==1.3.5
 chardet
@@ -19,7 +17,7 @@ matplotlib
 scikit-learn
 xgboost
 catboost
-protobuf>=5.26.1,<6.0dev
+protobuf
 psutil>=5.9,<7
 seaborn
 shap
@@ -27,3 +25,8 @@ matplotlib
 scikit-learn
 xgboost
 catboost
+azure-identity==1.21.0
+azure-ai-projects==1.0.0b10
+semantic-kernel[azure]==1.28.1
+azure-search-documents==11.6.0b8
+Jinja2==3.1.6
