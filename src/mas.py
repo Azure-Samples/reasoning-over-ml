@@ -1,11 +1,13 @@
 import os, asyncio
 from jinja2 import Environment, FileSystemLoader
 from azure.identity.aio import DefaultAzureCredential
-from semantic_kernel.agents import AgentGroupChat, AzureAIAgent, AzureAIAgentSettings, ChatCompletionAgent
+from semantic_kernel.agents import AgentGroupChat, AzureAIAgent, AzureAIAgentSettings, ChatCompletionAgent, ChatHistoryAgentThread
 from semantic_kernel.agents.strategies import TerminationStrategy, SequentialSelectionStrategy
 from semantic_kernel.contents import AuthorRole
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from agents.plugins.retrieval import RetrievalPlugin
+from azure.ai.projects.models import CodeInterpreterTool
+from semantic_kernel.contents.chat_history import ChatHistory
 
 class ApprovalTerminationStrategy(TerminationStrategy):
     """A strategy for determining when an agent should terminate."""
@@ -29,6 +31,9 @@ class SelectionStrategy(SequentialSelectionStrategy):
         
         return agent
 
+# intermediate_steps: list[ChatMessageContent] = []
+# async def handle_intermediate_steps(message: ChatMessageContent) -> None:
+#     intermediate_steps.append(message)
 
 class Orchestrator:
     def __init__(self):
@@ -39,6 +44,8 @@ class Orchestrator:
         self.template_analyst_agent = self.env.get_template(os.getenv('TEMPLATE_ANALYST_AGENT'))
         self.template_reviewer_agent = self.env.get_template(os.getenv('TEMPLATE_REVIEWER_AGENT'))
         self.template_orchestrator_agent = self.env.get_template(os.getenv('TEMPLATE_ORCHESTRATOR_AGENT'))
+
+        self.code_interpreter = CodeInterpreterTool()
 
     # Clean all agents
     async def clean_agents(self):
@@ -54,12 +61,26 @@ class Orchestrator:
                     print(f"Deleting agent: {agent.name}")
                     await client.agents.delete_agent(agent.id)
 
-    async def get_or_create_azure_agent(self, client, existing_agents, name, description, instructions, plugins=[]):
+    async def get_or_create_azure_agent(self, 
+                                        client, 
+                                        existing_agents, 
+                                        name, 
+                                        description, 
+                                        instructions, 
+                                        plugins=[], 
+                                        tools=None,
+                                        tool_resources=None,
+                                        ):
         for agent in existing_agents.data:
             if agent.name == name:
                 print(f"{name} already exists.")
                 agent_definition = await client.agents.get_agent(agent.id)
-                return AzureAIAgent(client=client, definition=agent_definition, plugins=plugins)
+                return AzureAIAgent(client=client, 
+                                    definition=agent_definition, 
+                                    plugins=plugins,
+                                    tools=tools,
+                                    tool_resources=tool_resources,                                    
+                                    )
 
         agent_definition = await client.agents.create_agent(
             model=self.ai_agent_settings.model_deployment_name,
@@ -67,13 +88,14 @@ class Orchestrator:
             temperature=0.0,
             description=description,
             instructions=instructions,
-
+            tools=tools,
+            tool_resources=tool_resources,
         )
         return AzureAIAgent(client=client, 
                             definition=agent_definition,
                             plugins=plugins)
 
-    async def run(self, user_input):
+    async def run(self, user_input, history=[]):
 
         async with (DefaultAzureCredential() as creds,
                     AzureAIAgent.create_client(credential=creds,
@@ -95,6 +117,9 @@ class Orchestrator:
                 name="AnalystAgent",
                 description="Agent to analyze the reasoning based on shap values and provide insights",
                 instructions=self.template_analyst_agent.render(),
+                tools=self.code_interpreter.definitions,
+                tool_resources=self.code_interpreter.resources,
+
             )
 
             agent_reviewer = await self.get_or_create_azure_agent(
@@ -114,6 +139,7 @@ class Orchestrator:
                 termination_strategy=ApprovalTerminationStrategy(agents=[agent_reviewer],                                                                  
                                                                  maximum_iterations=3),
                 selection_strategy=SelectionStrategy(),  
+                chat_history=ChatHistory(messages=history)
                 )
 
             try:
@@ -124,9 +150,15 @@ class Orchestrator:
                 # Invoke the chat
                 async for content in agent_group.invoke():
                     print(f"# {content.role} - {content.name or '*'}: '{content.content}'")
-            finally:
-                # Cleanup: Delete the agents
-                await agent_group.reset()
+
+            except Exception as e:
+                print(f"An error occurred: {e}")
+            # finally:
+            #     # Cleanup: Delete the agents
+            #     await agent_group.reset()
+
+            # Return the chat history
+            return agent_group.history.messages
  
 if __name__ == "__main__":
     orchestrator = Orchestrator()
@@ -141,4 +173,5 @@ if __name__ == "__main__":
             print("Exiting chat. Goodbye!")
             break
         # Run the agent group for each user input
-        asyncio.run(orchestrator.run(user_input))
+        history = history if 'history' in locals() else []
+        history = asyncio.run(orchestrator.run(user_input, history))
