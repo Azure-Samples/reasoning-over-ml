@@ -130,14 +130,15 @@ class Orchestrator:
  
 if __name__ == "__main__":
     orchestrator = Orchestrator()
-    
-    user_input = "Me ajude a interpretar os resultados do modelo de IA. /use_reasoning"
 
     # Clean all agents
     asyncio.run(orchestrator.clean_agents())
 
-    # Run the agent group
-    response = asyncio.run(orchestrator.run(user_input))
-    
-    # Print the response
-    # print(response)
+    print("Welcome to the AI Chatbot! Type '/exit' to quit.")
+    while True:
+        user_input = input("You: ")
+        if user_input.strip().lower() == "/exit":
+            print("Exiting chat. Goodbye!")
+            break
+        # Run the agent group for each user input
+        asyncio.run(orchestrator.run(user_input))
