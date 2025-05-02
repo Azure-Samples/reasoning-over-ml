@@ -1,4 +1,5 @@
 import os, asyncio
+from PIL import Image 
 from jinja2 import Environment, FileSystemLoader
 from azure.identity.aio import DefaultAzureCredential
 from semantic_kernel.agents import AgentGroupChat, AzureAIAgent, AzureAIAgentSettings, ChatCompletionAgent, ChatHistoryAgentThread
@@ -95,6 +96,22 @@ class Orchestrator:
                             definition=agent_definition,
                             plugins=plugins)
 
+    async def download_file_content(self, agent: AzureAIAgent, items: list):
+        for file in items:
+            if file.content_type == 'file_reference':
+                file_id = file.file_id
+                try:
+                    # Generate the file name using the file_id
+                    file_name = f"{file_id}.png"
+                    
+                    # Fetch the content of the file using the provided method
+                    await agent.client.agents.save_file(file_id=file_id,
+                                                        file_name=file_name)
+                    
+                    return file_name
+                except Exception as e:
+                    print(f"An error occurred while downloading file {file_id}: {str(e)}")
+
     async def run(self, user_input, history=[]):
 
         async with (DefaultAzureCredential() as creds,
@@ -150,6 +167,18 @@ class Orchestrator:
                 # Invoke the chat
                 async for content in agent_group.invoke():
                     print(f"# {content.role} - {content.name or '*'}: '{content.content}'")
+                    # If exists the file_reference in the content, download the file
+                    if any(item.content_type == 'file_reference' for item in content.items):
+                        # Get a reference to the agent with the content.name
+                        agent = next((agent for agent in agent_group.agents if agent.name == content.name), None)
+
+                        # Download the file content
+                        file = await self.download_file_content(agent=agent, items=content.items)
+
+                        # Show the image
+                        if file:
+                            img = Image.open(file)
+                            img.show()
 
             except Exception as e:
                 print(f"An error occurred: {e}")
