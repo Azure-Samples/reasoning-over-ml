@@ -175,6 +175,7 @@ class Orchestrator:
 
                 # Invoke the chat
                 output = []
+                file_name = None
                 async for content in agent_group.invoke():                    
                     # For each content in the chat add the response to a list
                     output.append({"role": content.role, "name": content.name or "*", "content": content.content})                    
@@ -191,7 +192,7 @@ class Orchestrator:
                         print(f"File downloaded: {file_name}")
             except Exception as e:
                 print(f"An error occurred: {e}")
-            return output
+            return output, file_name
  
 if __name__ == "__main__":
     orchestrator = Orchestrator()
