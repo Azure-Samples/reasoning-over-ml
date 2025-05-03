@@ -7,7 +7,6 @@ from semantic_kernel.contents import AuthorRole
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from agents.plugins.retrieval import RetrievalPlugin
 from azure.ai.projects.models import CodeInterpreterTool
-from semantic_kernel.contents.chat_history import ChatHistory
 import warnings
 from semantic_kernel import Kernel
 
@@ -48,18 +47,6 @@ class Orchestrator:
         self.template_reviewer_agent = self.env.get_template(os.getenv('TEMPLATE_REVIEWER_AGENT'))
         self.template_orchestrator_agent = self.env.get_template(os.getenv('TEMPLATE_ORCHESTRATOR_AGENT'))
         self.kernel = Kernel()
-
-
-    def _create_kernel(self, service_id: str, service_type: str) -> Kernel:        
-        if service_type == "ChatCompletion":
-            self.kernel.add_service(AzureChatCompletion(service_id=service_id, 
-                                                        endpoint=self.ai_agent_settings.endpoint,
-                                                        deployment_name=self.ai_agent_settings.model_deployment_name))
-        # else:
-        #     self.kernel.add_service(AzureAIAgent(service_id=service_id, 
-        #                                          client=client, 
-        #                                          definition=definition))
-        return self.kernel
 
     # Clean all agents
     async def clean_agents(self):
@@ -123,15 +110,11 @@ class Orchestrator:
                     await agent.client.agents.save_file(file_id=file_id,
                                                         file_name=file_name)
         
-                    
-                    # Delete the file after downloading
-                    # await agent.client.agents.delete_file(file_id=file_id)
-                    
-                    return file_name, file_id
+                    return file_name
                 except Exception as e:
                     print(f"An error occurred while downloading file {file_id}: {str(e)}")
 
-    async def run(self, user_input, history=[], file_ids=[], thread=None):
+    async def run(self, user_input, history=[]):
 
         async with (DefaultAzureCredential() as creds,
                     AzureAIAgent.create_client(credential=creds,
@@ -199,17 +182,13 @@ class Orchestrator:
                         agent = next((agent for agent in agent_group.agents if agent.name == content.name), None)
 
                         # Download the file content
-                        file_name, file_id = await self.download_file_content(agent=agent, items=content.items)
-                        file_ids.append(file_id)
+                        file_name = await self.download_file_content(agent=agent, items=content.items)
+
                         print(f"File downloaded: {file_name}")
             except Exception as e:
                 print(f"An error occurred: {e}")
-            # finally:
-            #     # Cleanup: Delete the agents
-            #     await agent_group.reset()
 
-            # Return the chat history
-            return agent_group.history.messages, file_ids
+            return agent_group.history.messages
  
 if __name__ == "__main__":
     orchestrator = Orchestrator()
@@ -225,9 +204,5 @@ if __name__ == "__main__":
             break
         # Run the agent group for each user input
         history = history if 'history' in locals() else []
-        file_ids = file_ids if 'file_ids' in locals() else []
 
-        # Loop into the history list and remove the message when there is history[5].metadata['code'] is true
-        # history = [message for message in history if not (message.metadata and message.metadata.get('code'))]
-
-        history, file_ids = asyncio.run(orchestrator.run(user_input, history, file_ids))
+        history = asyncio.run(orchestrator.run(user_input, history))
