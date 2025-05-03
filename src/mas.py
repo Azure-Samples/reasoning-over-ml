@@ -145,6 +145,7 @@ class Orchestrator:
                 tools=code_interpreter.definitions,
                 tool_resources=code_interpreter.resources,
                 kernel=self.kernel,
+                plugins=[RetrievalPlugin()],
             )
 
             agent_reviewer = await self.get_or_create_azure_agent(
