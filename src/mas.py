@@ -5,7 +5,7 @@ from semantic_kernel.agents import AgentGroupChat, AzureAIAgent, AzureAIAgentSet
 from semantic_kernel.agents.strategies import TerminationStrategy, SequentialSelectionStrategy
 from semantic_kernel.contents import AuthorRole
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
-from agents.plugins.retrieval import RetrievalPlugin
+from src.agents.plugins.retrieval import RetrievalPlugin
 from azure.ai.projects.models import CodeInterpreterTool
 import warnings
 from semantic_kernel import Kernel
