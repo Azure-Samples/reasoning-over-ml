@@ -1,14 +1,19 @@
 import os, asyncio
-from PIL import Image 
 from jinja2 import Environment, FileSystemLoader
 from azure.identity.aio import DefaultAzureCredential
-from semantic_kernel.agents import AgentGroupChat, AzureAIAgent, AzureAIAgentSettings, ChatCompletionAgent, ChatHistoryAgentThread
+from semantic_kernel.agents import AgentGroupChat, AzureAIAgent, AzureAIAgentSettings, ChatCompletionAgent
 from semantic_kernel.agents.strategies import TerminationStrategy, SequentialSelectionStrategy
 from semantic_kernel.contents import AuthorRole
 from semantic_kernel.connectors.ai.open_ai import AzureChatCompletion
 from agents.plugins.retrieval import RetrievalPlugin
 from azure.ai.projects.models import CodeInterpreterTool
 from semantic_kernel.contents.chat_history import ChatHistory
+import warnings
+from semantic_kernel import Kernel
+
+
+warnings.filterwarnings("ignore", category=RuntimeWarning)
+
 
 class ApprovalTerminationStrategy(TerminationStrategy):
     """A strategy for determining when an agent should terminate."""
@@ -32,9 +37,6 @@ class SelectionStrategy(SequentialSelectionStrategy):
         
         return agent
 
-# intermediate_steps: list[ChatMessageContent] = []
-# async def handle_intermediate_steps(message: ChatMessageContent) -> None:
-#     intermediate_steps.append(message)
 
 class Orchestrator:
     def __init__(self):
@@ -45,8 +47,19 @@ class Orchestrator:
         self.template_analyst_agent = self.env.get_template(os.getenv('TEMPLATE_ANALYST_AGENT'))
         self.template_reviewer_agent = self.env.get_template(os.getenv('TEMPLATE_REVIEWER_AGENT'))
         self.template_orchestrator_agent = self.env.get_template(os.getenv('TEMPLATE_ORCHESTRATOR_AGENT'))
+        self.kernel = Kernel()
 
-        self.code_interpreter = CodeInterpreterTool()
+
+    def _create_kernel(self, service_id: str, service_type: str) -> Kernel:        
+        if service_type == "ChatCompletion":
+            self.kernel.add_service(AzureChatCompletion(service_id=service_id, 
+                                                        endpoint=self.ai_agent_settings.endpoint,
+                                                        deployment_name=self.ai_agent_settings.model_deployment_name))
+        # else:
+        #     self.kernel.add_service(AzureAIAgent(service_id=service_id, 
+        #                                          client=client, 
+        #                                          definition=definition))
+        return self.kernel
 
     # Clean all agents
     async def clean_agents(self):
@@ -71,16 +84,17 @@ class Orchestrator:
                                         plugins=[], 
                                         tools=None,
                                         tool_resources=None,
+                                        kernel=None,
                                         ):
         for agent in existing_agents.data:
             if agent.name == name:
-                print(f"{name} already exists.")
                 agent_definition = await client.agents.get_agent(agent.id)
                 return AzureAIAgent(client=client, 
                                     definition=agent_definition, 
                                     plugins=plugins,
                                     tools=tools,
-                                    tool_resources=tool_resources,                                    
+                                    tool_resources=tool_resources,
+                                    kernel=kernel,
                                     )
 
         agent_definition = await client.agents.create_agent(
@@ -90,11 +104,12 @@ class Orchestrator:
             description=description,
             instructions=instructions,
             tools=tools,
-            tool_resources=tool_resources,
+            tool_resources=tool_resources,            
         )
         return AzureAIAgent(client=client, 
                             definition=agent_definition,
-                            plugins=plugins)
+                            plugins=plugins,
+                            kernel=kernel)
 
     async def download_file_content(self, agent: AzureAIAgent, items: list):
         for file in items:
@@ -107,18 +122,26 @@ class Orchestrator:
                     # Fetch the content of the file using the provided method
                     await agent.client.agents.save_file(file_id=file_id,
                                                         file_name=file_name)
+        
                     
-                    return file_name
+                    # Delete the file after downloading
+                    # await agent.client.agents.delete_file(file_id=file_id)
+                    
+                    return file_name, file_id
                 except Exception as e:
                     print(f"An error occurred while downloading file {file_id}: {str(e)}")
 
-    async def run(self, user_input, history=[]):
+    async def run(self, user_input, history=[], file_ids=[], thread=None):
 
         async with (DefaultAzureCredential() as creds,
                     AzureAIAgent.create_client(credential=creds,
                                                conn_str=self.ai_agent_settings.project_connection_string.get_secret_value()) as client,
             ):
             existing_agents = await client.agents.list_agents()
+            code_interpreter = CodeInterpreterTool()
+
+            # thread = await client.agents.create_thread() if not(thread) else thread
+            # print(f"Created thread, ID: {thread.id}")  
 
             reasoning_agent = ChatCompletionAgent(
                 service=AzureChatCompletion(endpoint=self.ai_agent_settings.endpoint,
@@ -127,16 +150,18 @@ class Orchestrator:
                 name="ReasoningAgent",
                 instructions=self.template_reasoning_agent.render(),
                 plugins=[RetrievalPlugin()],
+                kernel=self.kernel,
             )
 
             analyst_agent = await self.get_or_create_azure_agent(
-                client, existing_agents,
+                client, 
+                existing_agents,
                 name="AnalystAgent",
                 description="Agent to analyze the reasoning based on shap values and provide insights",
                 instructions=self.template_analyst_agent.render(),
-                tools=self.code_interpreter.definitions,
-                tool_resources=self.code_interpreter.resources,
-
+                tools=code_interpreter.definitions,
+                tool_resources=code_interpreter.resources,
+                kernel=self.kernel,
             )
 
             agent_reviewer = await self.get_or_create_azure_agent(
@@ -144,7 +169,7 @@ class Orchestrator:
                 name="ReviewerAgent",
                 description="Agent to review the responses",
                 instructions=self.template_reviewer_agent.render(),
-            )
+                kernel=self.kernel)
 
             
 
@@ -156,16 +181,17 @@ class Orchestrator:
                 termination_strategy=ApprovalTerminationStrategy(agents=[agent_reviewer],                                                                  
                                                                  maximum_iterations=3),
                 selection_strategy=SelectionStrategy(),  
-                chat_history=ChatHistory(messages=history)
+                # chat_history=ChatHistory(messages=history)
                 )
 
             try:
                 # Add the user_input as a message to the group chat
                 await agent_group.add_chat_message(message=user_input)
+                
                 print(f"# {AuthorRole.USER}: '{user_input}'")
 
                 # Invoke the chat
-                async for content in agent_group.invoke():
+                async for content in agent_group.invoke():                    
                     print(f"# {content.role} - {content.name or '*'}: '{content.content}'")
                     # If exists the file_reference in the content, download the file
                     if any(item.content_type == 'file_reference' for item in content.items):
@@ -173,13 +199,9 @@ class Orchestrator:
                         agent = next((agent for agent in agent_group.agents if agent.name == content.name), None)
 
                         # Download the file content
-                        file = await self.download_file_content(agent=agent, items=content.items)
-
-                        # Show the image
-                        if file:
-                            img = Image.open(file)
-                            img.show()
-
+                        file_name, file_id = await self.download_file_content(agent=agent, items=content.items)
+                        file_ids.append(file_id)
+                        print(f"File downloaded: {file_name}")
             except Exception as e:
                 print(f"An error occurred: {e}")
             # finally:
@@ -187,7 +209,7 @@ class Orchestrator:
             #     await agent_group.reset()
 
             # Return the chat history
-            return agent_group.history.messages
+            return agent_group.history.messages, file_ids
  
 if __name__ == "__main__":
     orchestrator = Orchestrator()
@@ -203,4 +225,9 @@ if __name__ == "__main__":
             break
         # Run the agent group for each user input
         history = history if 'history' in locals() else []
-        history = asyncio.run(orchestrator.run(user_input, history))
+        file_ids = file_ids if 'file_ids' in locals() else []
+
+        # Loop into the history list and remove the message when there is history[5].metadata['code'] is true
+        # history = [message for message in history if not (message.metadata and message.metadata.get('code'))]
+
+        history, file_ids = asyncio.run(orchestrator.run(user_input, history, file_ids))
