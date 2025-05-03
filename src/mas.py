@@ -114,7 +114,7 @@ class Orchestrator:
                 except Exception as e:
                     print(f"An error occurred while downloading file {file_id}: {str(e)}")
 
-    async def run(self, user_input, history=[]):
+    async def run(self, user_input):
 
         async with (DefaultAzureCredential() as creds,
                     AzureAIAgent.create_client(credential=creds,
@@ -165,7 +165,6 @@ class Orchestrator:
                 termination_strategy=ApprovalTerminationStrategy(agents=[agent_reviewer],                                                                  
                                                                  maximum_iterations=3),
                 selection_strategy=SelectionStrategy(),  
-                # chat_history=ChatHistory(messages=history)
                 )
 
             try:
@@ -175,8 +174,12 @@ class Orchestrator:
                 print(f"# {AuthorRole.USER}: '{user_input}'")
 
                 # Invoke the chat
+                output = []
                 async for content in agent_group.invoke():                    
-                    print(f"# {content.role} - {content.name or '*'}: '{content.content}'")
+                    # For each content in the chat add the response to a list
+                    output.append({"role": content.role, "name": content.name or "*", "content": content.content})                    
+
+                    #print(f"# {content.role} - {content.name or '*'}: '{content.content}'")
                     # If exists the file_reference in the content, download the file
                     if any(item.content_type == 'file_reference' for item in content.items):
                         # Get a reference to the agent with the content.name
@@ -188,8 +191,7 @@ class Orchestrator:
                         print(f"File downloaded: {file_name}")
             except Exception as e:
                 print(f"An error occurred: {e}")
-
-            return agent_group.history.messages
+            return output
  
 if __name__ == "__main__":
     orchestrator = Orchestrator()
@@ -203,7 +205,5 @@ if __name__ == "__main__":
         if user_input.strip().lower() == "/exit":
             print("Exiting chat. Goodbye!")
             break
-        # Run the agent group for each user input
-        history = history if 'history' in locals() else []
 
-        history = asyncio.run(orchestrator.run(user_input, history))
+        history = asyncio.run(orchestrator.run(user_input))
