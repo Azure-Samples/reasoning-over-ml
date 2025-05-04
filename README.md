@@ -83,3 +83,8 @@ We welcome contributions! Please review our [CONTRIBUTING.md](CONTRIBUTING.md) a
 This project is licensed under the [MIT License](LICENSE.md). 
 
 **Enjoy exploring ML reasoning with your AI agents!**
+
+## TO-DO
+- The Gradio UI has some issues and need to be fixed
+- The interactions between the agents can be optimized
+- Add a reasoning checkbox to activate the Reasoning Agent and needed
